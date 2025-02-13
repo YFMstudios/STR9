@@ -59,7 +59,7 @@ public class Kingdom : MonoBehaviour
         kingdoms[0] = new Kingdom("Arianopol", 0, 7500, 3500, 7500, 5500, 3500, 0, 0, arianopolFlag);
         kingdoms[1] = new Kingdom("Alfgard", 0, 75000, 35000, 75000, 55000, 35000, 0, 0, alfgardFlag);
         kingdoms[2] = new Kingdom("Akhadzria", 0, 7500, 3500, 7500, 5500, 3500, 0, 0, akhadzriaFlag);
-        kingdoms[3] = new Kingdom("Dhamuron", 0, 7500, 3500, 7500, 5500, 3500, 0, 0, dhamuronFlag);
+        kingdoms[3] = new Kingdom("Dhamuron", 0, 75000, 35000, 75000, 55000, 35000, 0, 0, dhamuronFlag);
         kingdoms[4] = new Kingdom("Lexion", 0, 75000, 35000, 75000, 55000, 35000, 0, 0, lexionFlag);
         kingdoms[5] = new Kingdom("Zephyrion", 0, 7500, 3500, 7500, 5500, 3500, 0, 0, zephyrionFlag);
 

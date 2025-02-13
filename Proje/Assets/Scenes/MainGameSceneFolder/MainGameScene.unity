@@ -3533,7 +3533,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.6039216, g: 0.61960787, b: 0.6313726, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3582,12 +3582,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34a6cd214f5904e4d92af5d69901db47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LexionLinePNG: {fileID: 21300000, guid: 32ec6c668b27bb143a2ea5ea8857be40, type: 3}
-  AlfgardLinePNG: {fileID: 21300000, guid: e127b092242971549adae438394fdeab, type: 3}
-  ZephrionLinePNG: {fileID: 21300000, guid: 66c3930190e65ac43bd8ae7e59a821c3, type: 3}
-  ArianopolLinePNG: {fileID: 21300000, guid: e6dd6a3563e6b3441a30871841a4438e, type: 3}
-  DhamuronLinePNG: {fileID: 21300000, guid: b669b5375abb8bd44a23f5082c166695, type: 3}
-  AkhadzriaPNG: {fileID: 21300000, guid: 76e7ab82ee3b2434795588d23c289da0, type: 3}
+  LexionLinePNGImage: {fileID: 1359678176}
+  AlfgardLinePNGImage: {fileID: 1351874301}
+  ZephrionLinePNGImage: {fileID: 82315954}
+  ArianopolLinePNGImage: {fileID: 195365619}
+  DhamuronLinePNGImage: {fileID: 954679261}
+  AkhadzriaPNGImage: {fileID: 1819740958}
   FlagImage: {fileID: 1972852163}
   WarIcon: {fileID: 398410885}
   ObservationImage: {fileID: 1337373507}
@@ -7715,7 +7715,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.89411765, g: 0.6745098, b: 0.6862745, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -7764,12 +7764,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34a6cd214f5904e4d92af5d69901db47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LexionLinePNG: {fileID: 21300000, guid: 32ec6c668b27bb143a2ea5ea8857be40, type: 3}
-  AlfgardLinePNG: {fileID: 21300000, guid: e127b092242971549adae438394fdeab, type: 3}
-  ZephrionLinePNG: {fileID: 21300000, guid: 66c3930190e65ac43bd8ae7e59a821c3, type: 3}
-  ArianopolLinePNG: {fileID: 21300000, guid: e6dd6a3563e6b3441a30871841a4438e, type: 3}
-  DhamuronLinePNG: {fileID: 21300000, guid: b669b5375abb8bd44a23f5082c166695, type: 3}
-  AkhadzriaPNG: {fileID: 21300000, guid: 76e7ab82ee3b2434795588d23c289da0, type: 3}
+  LexionLinePNGImage: {fileID: 1359678176}
+  AlfgardLinePNGImage: {fileID: 1351874301}
+  ZephrionLinePNGImage: {fileID: 82315954}
+  ArianopolLinePNGImage: {fileID: 195365619}
+  DhamuronLinePNGImage: {fileID: 954679261}
+  AkhadzriaPNGImage: {fileID: 1819740958}
   FlagImage: {fileID: 1972852163}
   WarIcon: {fileID: 398410885}
   ObservationImage: {fileID: 1337373507}
@@ -16650,24 +16650,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34a6cd214f5904e4d92af5d69901db47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LexionLinePNG: {fileID: 0}
-  AlfgardLinePNG: {fileID: 0}
-  ZephrionLinePNG: {fileID: 0}
-  ArianopolLinePNG: {fileID: 0}
-  DhamuronLinePNG: {fileID: 0}
-  AkhadzriaPNG: {fileID: 0}
+  LexionLinePNGImage: {fileID: 1359678176}
+  AlfgardLinePNGImage: {fileID: 1351874301}
+  ZephrionLinePNGImage: {fileID: 82315954}
+  ArianopolLinePNGImage: {fileID: 195365619}
+  DhamuronLinePNGImage: {fileID: 954679261}
+  AkhadzriaPNGImage: {fileID: 1819740958}
   FlagImage: {fileID: 1972852163}
   WarIcon: {fileID: 398410885}
   ObservationImage: {fileID: 1337373507}
-  warSprite: {fileID: 0}
-  observationSprite: {fileID: 0}
+  warSprite: {fileID: 21300000, guid: 4d333dfaf81a6494c87919d0d035983b, type: 3}
+  observationSprite: {fileID: 21300000, guid: 1bddbe55b205a6545ade4442c7f66b75, type: 3}
   owner: {fileID: 1996940087}
   kingdom: {fileID: 443561894}
   civilization: {fileID: 1621535820}
   numberOfSoldier: {fileID: 1409995585}
   playerNameText: {fileID: 780452619}
   kingdomNameText: {fileID: 988860589}
-  foodAmountText: {fileID: 364913690}
+  foodAmountText: {fileID: 1267707489}
   stoneAmountText: {fileID: 755820741}
   goldAmountText: {fileID: 1886413976}
   woodAmountText: {fileID: 364913690}
@@ -29022,69 +29022,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 707118221}
   m_CullTransparentMesh: 1
---- !u!1 &707266691
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 707266693}
-  - component: {fileID: 707266692}
-  m_Layer: 0
-  m_Name: DrawLineController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &707266692
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 707266691}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 448408f17b8061c4580ce58da9702240, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  kingdoms:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  akhadzriaWithLine: {fileID: 21300000, guid: 76e7ab82ee3b2434795588d23c289da0, type: 3}
-  alfgardWithLine: {fileID: 21300000, guid: e127b092242971549adae438394fdeab, type: 3}
-  arianopolWithLine: {fileID: 21300000, guid: e6dd6a3563e6b3441a30871841a4438e, type: 3}
-  dhamuronWithLine: {fileID: 21300000, guid: b669b5375abb8bd44a23f5082c166695, type: 3}
-  lexionWithLine: {fileID: 21300000, guid: 32ec6c668b27bb143a2ea5ea8857be40, type: 3}
-  zephrionWithLine: {fileID: 21300000, guid: 66c3930190e65ac43bd8ae7e59a821c3, type: 3}
-  akhadzriaSprite: {fileID: 21300000, guid: 193172b842cd17b468a0feb12ede63d6, type: 3}
-  alfgardSprite: {fileID: 21300000, guid: 212ef600c816482459232a92fc1e1e00, type: 3}
-  arianopolSprite: {fileID: 21300000, guid: d0815a37bba95514eb4a765d38ad7cb3, type: 3}
-  dhamuronSprite: {fileID: 21300000, guid: f032738862c1eda428076063dbec380d, type: 3}
-  lexionSprite: {fileID: 21300000, guid: 4a00c6aeefdc0a74ba886a0398ab47b1, type: 3}
-  zephrionSprite: {fileID: 21300000, guid: 9ba2c190c25afbc418c0eb13f1991b42, type: 3}
---- !u!4 &707266693
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 707266691}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.8617382, y: -2.4985545, z: -2.5800176}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1581388795}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &707480213
 GameObject:
   m_ObjectHideFlags: 0
@@ -37560,7 +37497,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.9529412, g: 0.95686275, b: 0.96862745, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -37609,12 +37546,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34a6cd214f5904e4d92af5d69901db47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LexionLinePNG: {fileID: 21300000, guid: 32ec6c668b27bb143a2ea5ea8857be40, type: 3}
-  AlfgardLinePNG: {fileID: 21300000, guid: e127b092242971549adae438394fdeab, type: 3}
-  ZephrionLinePNG: {fileID: 21300000, guid: 66c3930190e65ac43bd8ae7e59a821c3, type: 3}
-  ArianopolLinePNG: {fileID: 21300000, guid: e6dd6a3563e6b3441a30871841a4438e, type: 3}
-  DhamuronLinePNG: {fileID: 21300000, guid: b669b5375abb8bd44a23f5082c166695, type: 3}
-  AkhadzriaPNG: {fileID: 21300000, guid: 76e7ab82ee3b2434795588d23c289da0, type: 3}
+  LexionLinePNGImage: {fileID: 1359678176}
+  AlfgardLinePNGImage: {fileID: 1351874301}
+  ZephrionLinePNGImage: {fileID: 82315954}
+  ArianopolLinePNGImage: {fileID: 195365619}
+  DhamuronLinePNGImage: {fileID: 954679261}
+  AkhadzriaPNGImage: {fileID: 1819740958}
   FlagImage: {fileID: 1972852163}
   WarIcon: {fileID: 398410885}
   ObservationImage: {fileID: 1337373507}
@@ -54188,7 +54125,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.58431375, g: 0.61960787, b: 0.9254902, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -54237,12 +54174,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34a6cd214f5904e4d92af5d69901db47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LexionLinePNG: {fileID: 21300000, guid: 32ec6c668b27bb143a2ea5ea8857be40, type: 3}
-  AlfgardLinePNG: {fileID: 21300000, guid: e127b092242971549adae438394fdeab, type: 3}
-  ZephrionLinePNG: {fileID: 21300000, guid: 66c3930190e65ac43bd8ae7e59a821c3, type: 3}
-  ArianopolLinePNG: {fileID: 21300000, guid: e6dd6a3563e6b3441a30871841a4438e, type: 3}
-  DhamuronLinePNG: {fileID: 21300000, guid: b669b5375abb8bd44a23f5082c166695, type: 3}
-  AkhadzriaPNG: {fileID: 21300000, guid: 76e7ab82ee3b2434795588d23c289da0, type: 3}
+  LexionLinePNGImage: {fileID: 1359678176}
+  AlfgardLinePNGImage: {fileID: 1351874301}
+  ZephrionLinePNGImage: {fileID: 82315954}
+  ArianopolLinePNGImage: {fileID: 195365619}
+  DhamuronLinePNGImage: {fileID: 954679261}
+  AkhadzriaPNGImage: {fileID: 1819740958}
   FlagImage: {fileID: 1972852163}
   WarIcon: {fileID: 398410885}
   ObservationImage: {fileID: 1337373507}
@@ -54487,7 +54424,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.9098039, g: 0.91764706, b: 0.6627451, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -54536,12 +54473,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34a6cd214f5904e4d92af5d69901db47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LexionLinePNG: {fileID: 21300000, guid: 32ec6c668b27bb143a2ea5ea8857be40, type: 3}
-  AlfgardLinePNG: {fileID: 21300000, guid: e127b092242971549adae438394fdeab, type: 3}
-  ZephrionLinePNG: {fileID: 21300000, guid: 66c3930190e65ac43bd8ae7e59a821c3, type: 3}
-  ArianopolLinePNG: {fileID: 21300000, guid: e6dd6a3563e6b3441a30871841a4438e, type: 3}
-  DhamuronLinePNG: {fileID: 21300000, guid: b669b5375abb8bd44a23f5082c166695, type: 3}
-  AkhadzriaPNG: {fileID: 21300000, guid: 76e7ab82ee3b2434795588d23c289da0, type: 3}
+  LexionLinePNGImage: {fileID: 1359678176}
+  AlfgardLinePNGImage: {fileID: 1351874301}
+  ZephrionLinePNGImage: {fileID: 82315954}
+  ArianopolLinePNGImage: {fileID: 195365619}
+  DhamuronLinePNGImage: {fileID: 954679261}
+  AkhadzriaPNGImage: {fileID: 1819740958}
   FlagImage: {fileID: 1972852163}
   WarIcon: {fileID: 398410885}
   ObservationImage: {fileID: 1337373507}
@@ -64011,7 +63948,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 707266693}
   - {fileID: 1305549116}
   - {fileID: 478927421}
   - {fileID: 930858137}
@@ -74956,7 +74892,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.627451, g: 0.9019608, b: 0.73333335, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -75005,12 +74941,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34a6cd214f5904e4d92af5d69901db47, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LexionLinePNG: {fileID: 21300000, guid: 32ec6c668b27bb143a2ea5ea8857be40, type: 3}
-  AlfgardLinePNG: {fileID: 21300000, guid: e127b092242971549adae438394fdeab, type: 3}
-  ZephrionLinePNG: {fileID: 21300000, guid: 66c3930190e65ac43bd8ae7e59a821c3, type: 3}
-  ArianopolLinePNG: {fileID: 21300000, guid: e6dd6a3563e6b3441a30871841a4438e, type: 3}
-  DhamuronLinePNG: {fileID: 21300000, guid: b669b5375abb8bd44a23f5082c166695, type: 3}
-  AkhadzriaPNG: {fileID: 21300000, guid: 76e7ab82ee3b2434795588d23c289da0, type: 3}
+  LexionLinePNGImage: {fileID: 1359678176}
+  AlfgardLinePNGImage: {fileID: 1351874301}
+  ZephrionLinePNGImage: {fileID: 82315954}
+  ArianopolLinePNGImage: {fileID: 195365619}
+  DhamuronLinePNGImage: {fileID: 954679261}
+  AkhadzriaPNGImage: {fileID: 1819740958}
   FlagImage: {fileID: 1972852163}
   WarIcon: {fileID: 398410885}
   ObservationImage: {fileID: 1337373507}

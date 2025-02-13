@@ -1,327 +1,654 @@
+
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 using Photon.Pun;
 using Photon.Realtime;
+using System.Collections.Generic;
+
 
 public class RegionClickHandler : MonoBehaviour, IPointerClickHandler
 {
-    // �ehirler i�in kullan�lacak sprite'lar
-    public Sprite LexionLinePNG;
-    public Sprite AlfgardLinePNG;
-    public Sprite ZephrionLinePNG;
-    public Sprite ArianopolLinePNG;
-    public Sprite DhamuronLinePNG;
-    public Sprite AkhadzriaPNG;
+    public Image LexionLinePNGImage, AlfgardLinePNGImage, ZephrionLinePNGImage, ArianopolLinePNGImage, DhamuronLinePNGImage, AkhadzriaPNGImage;
+    public Image FlagImage, WarIcon, ObservationImage;
+    public Sprite warSprite, observationSprite;
+    public TMP_Text owner, kingdom, civilization, numberOfSoldier;
+    public TextMeshProUGUI playerNameText, kingdomNameText, foodAmountText, stoneAmountText, goldAmountText, woodAmountText, ironAmountText, warPowerText;
 
-    public Image FlagImage;
-    public Image WarIcon;
-    public Image ObservationImage;//G�zetleme Iconu
-    public Sprite warSprite;
-    public Sprite observationSprite;
-    public TMP_Text owner;//sahibi
-    public TMP_Text kingdom;//krall�k
-    public TMP_Text civilization;//medeniyet
-    public TMP_Text numberOfSoldier;//Asker Say�s�
+    public static string opponentName;
+    private static Image lastClickedRegion;
+    private static Dictionary<Image, Color> regionColors = new Dictionary<Image, Color>();
+
+    private static string LastClickedKingdom = "Empty";
     int selectedKingdom = GetVariableFromHere.currentSpriteNum;
 
-    int selectedKingdom2 = GetVariableFromHere2.currentSpriteNum;
- public TextMeshProUGUI playerNameText;  // TextMeshProUGUI kullanılıyor
-    public TextMeshProUGUI kingdomNameText;
-    public TextMeshProUGUI foodAmountText;
-    public TextMeshProUGUI stoneAmountText;
-    public TextMeshProUGUI goldAmountText;
-    public TextMeshProUGUI woodAmountText;
-    public TextMeshProUGUI ironAmountText;
-    public TextMeshProUGUI warPowerText;
-
-
-// Rakip oyuncunun veya bilgisayarın seçtiği krallığı temsil eden static string değişken
-    public static string opponentName;
-
-
-    // Orijinal sprite'lar� saklamak i�in bir de�i�ken
-    private Sprite originalSprite;
-
-    // Son t�klanan b�lgenin referans�
-    private static Image lastClickedRegion;
+    // Krallıklar ve onlara ait görseller için bir sözlük oluşturuluyor
+    private Dictionary<Image, string> regionOwnership = new Dictionary<Image, string>(); // Bölgeye göre sahiplik bilgisi
+    private Dictionary<string, KingdomDetails> kingdomDetails = new Dictionary<string, KingdomDetails>();
 
     void Start()
     {
-        //createDefaultPanel();
-        createDefaultPanel2();
-        Renderer renderer = GetComponent<Renderer>();
+        createDefaultPanel();
+        InitializeRegionColors();
+        InitializeKingdomRegions();
+        // Fetih işlemleri
+        if (kingdomDetails.ContainsKey("Lexion") && kingdomDetails.ContainsKey("Alfgard"))
+        {
+            ConquerKingdom("Lexion", "Alfgard");
+        }
+
+        if (kingdomDetails.ContainsKey("Lexion") && kingdomDetails.ContainsKey("Akhadzria"))
+        {
+            ConquerKingdom("Lexion", "Akhadzria");
+        }
     }
 
-    // T�klama olay�n� dinleyen metod
+    private void InitializeRegionColors()
+    {
+        foreach (var region in FindObjectsOfType<Image>())
+        {
+            if (!regionColors.ContainsKey(region))
+            {
+                regionColors[region] = region.color;
+            }
+        }
+    }
+
+    private void InitializeKingdomRegions()
+    {
+        kingdomDetails.Add("Lexion", new KingdomDetails("Lexion", "Elf", Color.green, new List<Image> { LexionLinePNGImage }, LexionLinePNGImage.sprite));
+        kingdomDetails.Add("Alfgard", new KingdomDetails("Alfgard", "Büyücü", Color.blue, new List<Image> { AlfgardLinePNGImage }, AlfgardLinePNGImage.sprite));
+        kingdomDetails.Add("Zephrion", new KingdomDetails("Zephrion", "Ölüler", Color.red, new List<Image> { ZephrionLinePNGImage }, ZephrionLinePNGImage.sprite));
+        kingdomDetails.Add("Arianopol", new KingdomDetails("Arianopol", "İnsan", Color.yellow, new List<Image> { ArianopolLinePNGImage }, ArianopolLinePNGImage.sprite));
+        kingdomDetails.Add("Dhamuron", new KingdomDetails("Dhamuron", "Cüceler", Color.cyan, new List<Image> { DhamuronLinePNGImage }, DhamuronLinePNGImage.sprite));
+        kingdomDetails.Add("Akhadzria", new KingdomDetails("Akhadzria", "Orklar", Color.magenta, new List<Image> { AkhadzriaPNGImage }, AkhadzriaPNGImage.sprite));
+
+        // Bölge sahipliklerini başlat
+        foreach (var kvp in kingdomDetails)
+        {
+            foreach (var region in kvp.Value.RegionImages)
+            {
+                if (region != null && !regionOwnership.ContainsKey(region))
+                {
+                    regionOwnership[region] = kvp.Key; // Başlangıçta her bölge kendi krallığına ait
+                }
+            }
+        }
+    }
+
     public void OnPointerClick(PointerEventData eventData)
     {
-        string clickedKingdomName = gameObject.name; // Tıklanan krallığın adı
-        // Mevcut Image bile�enini al�yoruz
         Image imageComponent = GetComponent<Image>();
+        string clickedKingdomName = GetKingdomByRegion(imageComponent);
 
-        // E�er bir �nceki t�klanan b�lge varsa, eski haline d�nd�r
-        if (lastClickedRegion != null && lastClickedRegion != imageComponent)
+        if (LastClickedKingdom == "Empty")
         {
-            lastClickedRegion.sprite = lastClickedRegion.GetComponent<RegionClickHandler>().originalSprite;
+            LastClickedKingdom = clickedKingdomName;
+            SetKingdomColor(clickedKingdomName);
         }
-
-        // Orijinal sprite'� sakl�yoruz (sadece ilk t�klamada)
-        if (originalSprite == null)
+        else if (LastClickedKingdom != clickedKingdomName)
         {
-            originalSprite = imageComponent.sprite;
+            ResetKingdomColor(LastClickedKingdom);
+            SetKingdomColor(clickedKingdomName);
+            LastClickedKingdom = clickedKingdomName;
         }
-
-        // T�klanan objenin ismine g�re g�rseli de�i�tiriyoruz
-        if (imageComponent != null)
+        else
         {
-            switch (gameObject.name)
+            ResetKingdomColor(clickedKingdomName);
+            LastClickedKingdom = "Empty";
+        }
+        UpdateRegionDetails(imageComponent);
+        UpdatePhotonPlayerDetails(clickedKingdomName);
+    }
+
+    private void ResetKingdomColor(string kingdomName)
+    {
+        foreach (var kvp in regionOwnership)
+        {
+            if (kvp.Value == kingdomName)
             {
-                case "Lexion":
-                    imageComponent.sprite = LexionLinePNG;
+                kvp.Key.color = Color.white;
+            }
+        }
+    }
 
-                    FlagImage.sprite = Kingdom.Kingdoms[4].Flag;
-                    if (isYourKingdoms("Lexion") == true)
-                    {
-                        WarIcon.enabled = false;
-                        ObservationImage.enabled = false;
-                    }
-                    else
-                    {
-                        WarIcon.enabled = true;
-                        ObservationImage.enabled = true;
-                        WarIcon.sprite = warSprite;
-                        ObservationImage.sprite = observationSprite;
-                    }
-                    owner.text = "Sahibi: " + findOwner("Lexion");
-                    kingdom.text = "Krall�k:Lexion";
-                    civilization.text = "Medeniyet:Elf";
-                    numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[4].SoldierAmount.ToString();
+    private void SetKingdomColor(string kingdomName)
+    {
+        if (kingdomDetails.ContainsKey(kingdomName))
+        {
+            Color kingdomColor = kingdomDetails[kingdomName].KingdomColor;
+            foreach (var kvp in regionOwnership)
+            {
+                if (kvp.Value == kingdomName)
+                {
+                    kvp.Key.color = kingdomColor;
+                }
+            }
+        }
+    }
 
-                    break;
-                case "Alfgard":
-                    imageComponent.sprite = AlfgardLinePNG;
+    public void ConquerKingdom(string conqueringKingdom, string conqueredKingdom)
+    {
+        if (kingdomDetails.ContainsKey(conqueringKingdom) && kingdomDetails.ContainsKey(conqueredKingdom))
+        {
+            // Geçici bir liste kullanarak, değiştirme işlemini hatasız gerçekleştirme
+            var regionsToUpdate = new List<Image>();
 
-                    FlagImage.sprite = Kingdom.Kingdoms[1].Flag;
-                    if (isYourKingdoms("Alfgard") == true)
-                    {
-                        WarIcon.enabled = false;
-                        ObservationImage.enabled = false;
-                    }
-                    else
-                    {
-                        WarIcon.enabled = true;
-                        ObservationImage.enabled = true;
-                        WarIcon.sprite = warSprite;
-                        ObservationImage.sprite = observationSprite;
-                    }
-                    owner.text = "Sahibi: " + findOwner("Alfgard");
-                    kingdom.text = "Krall�k:Alfgard";
-                    civilization.text = "Medeniyet:B�y�c�";
-                    numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[1].SoldierAmount.ToString();
+            foreach (var kvp in regionOwnership)
+            {
+                if (kvp.Value == conqueredKingdom)
+                {
+                    regionsToUpdate.Add(kvp.Key);
+                }
+            }
 
-                    break;
-                case "Zephrion":
-                    imageComponent.sprite = ZephrionLinePNG;
+            foreach (var region in regionsToUpdate)
+            {
+                regionOwnership[region] = conqueringKingdom;
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"Fetih işlemi başarısız: {conqueringKingdom} veya {conqueredKingdom} geçerli değil.");
+        }
+    }
 
-                    FlagImage.sprite = Kingdom.Kingdoms[5].Flag;
+    private string GetKingdomByRegion(Image imageComponent)
+    {
+        return regionOwnership.ContainsKey(imageComponent) ? regionOwnership[imageComponent] : "Unknown";
+    }
+
+    private void UpdateRegionDetails(Image imageComponent)
+    {
+        // Bölgenin gerçek sahibi olan krallığı bul
+        string kingdomName = GetKingdomByRegion(imageComponent);
+
+        // Bölgenin detaylarını güncelleme işlemi
+        if (kingdomDetails.ContainsKey(kingdomName))
+        {
+            KingdomDetails details = kingdomDetails[kingdomName];
+            FlagImage.sprite = Resources.Load<Sprite>($"Flags/{kingdomName}Flag");
+            owner.text = $"Sahibi: {findOwner(kingdomName)}";
+            if(findOwner(kingdomName) == "Player") 
+            {
+                WarIcon.enabled = false;
+                ObservationImage.enabled = false;
+            }
+            else
+            {
+                WarIcon.enabled= true;
+                ObservationImage.enabled= true;
+                WarIcon.sprite = warSprite;
+                ObservationImage.sprite = observationSprite;
+            }
+            kingdom.text = $"Krallık : {kingdomName}";
+            civilization.text = $"Medeniyet : {kingdomDetails[kingdomName].CivilizationName}";
+            numberOfSoldier.text = $"Asker Sayısı :{Kingdom.kingdoms[kingdomNameToKingdomID(kingdomName)].SoldierAmount}";
+
+        }
+        else
+        {
+            Debug.LogWarning("Bölge için eşleşme bulunamadı.");
+        }
+    }
+    public int kingdomNameToKingdomID(string kingdomName)
+    {
+        if (kingdomName == "Arianopol") return 0;        
+        else if (kingdomName == "Alfgard")  return 1;
+        else if (kingdomName == "Akhadzria")  return 2;
+        else if (kingdomName == "Dhamuron")  return 3;
+        else if (kingdomName == "Lexion")  return 4;
+        else if (kingdomName == "Zephrion")  return 5;
+        else
+        {
+            Debug.Log(kingdomName + "Bulunamadı");
+            return -1;
+        }
+    }
+
+    public string findOwner(string kingdomName)
+    {
+
+        // Single-player kontrolü
+        if (ScreenTransitions2.ScreenNavigator.previousScreen == "Simple" ||
+            ScreenTransitions2.ScreenNavigator.previousScreen == "Mid" ||
+            ScreenTransitions2.ScreenNavigator.previousScreen == "Hard")
+        {
+            foreach (Kingdom kingdom in Kingdom.Kingdoms)
+            {
+                if (kingdom.Owner == 1 && kingdom.Name == name)
+                {
+                    return "Player";
+                }
+            }
+            return "Bilgisayar";
+        }
+
+        else
+        {
+            // Bulunduğunuz odayı yazdırıyoruz
+            //Debug.Log($"Bulunduğunuz Oda: {PhotonNetwork.CurrentRoom.Name}");
+
+            // Photon odasındaki oyuncu listesini alıyoruz
+            Player[] players = PhotonNetwork.PlayerList;
+
+            // Odadaki tüm oyuncuların isimlerini ve krallıklarını yazdırıyoruz
+            foreach (Player player in players)
+            {
+                string playerName = player.CustomProperties.ContainsKey("PlayerName")
+                                    ? player.CustomProperties["PlayerName"].ToString()
+                                    : "Oyuncu Adı Yok";
+                string kingdom = player.CustomProperties.ContainsKey("Kingdom")
+                                 ? player.CustomProperties["Kingdom"].ToString()
+                                 : "Krallık Bilgisi Yok";
+
+                Debug.Log($"Oyuncu: {playerName}, Krallık: {kingdom}");
+            }
+            //PhotonNetwork.CurrentPlayerName
+            // Krallık ismi eşleşmesi olan bir kullanıcı var mı kontrol ediyoruz
+            foreach (Player player in players)
+            {
+                if (player.CustomProperties.ContainsKey("Kingdom") &&
+                    player.CustomProperties["Kingdom"].ToString() == kingdomName)
+                {
+
+                    // opponentName'e atama yapıyoruz
+                    opponentName = player.CustomProperties.ContainsKey("PlayerName")
+                                   ? player.CustomProperties["PlayerName"].ToString()
+                                   : "Oyuncu Adı Yok";
+
+                    // Eğer krallık ismi eşleşiyorsa oyuncunun adını döndür
+                    return player.CustomProperties.ContainsKey("PlayerName")
+                        ? player.CustomProperties["PlayerName"].ToString()
+                        : "Oyuncu Adı Yok";
+
+
+                }
+            }
+            // Eğer eşleşen bir oyuncu yoksa bilgisayar olarak döndür
+            return "Bilgisayar";
+        }
+    }
+
+    public void createDefaultPanel()
+    {
+
+
+        if (selectedKingdom == 2)
+        {
+            FlagImage.sprite = Kingdom.Kingdoms[2].Flag;
+            WarIcon.enabled = false;
+            owner.text = "Sahibi: Player";
+            kingdom.text = "Krall�k: Akhadzria";
+            civilization.text = "Medeniyet: Ork";
+            numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[2].SoldierAmount.ToString();
+        }
+        else if (selectedKingdom == 3)
+        {
+            FlagImage.sprite = Kingdom.Kingdoms[1].Flag;
+            WarIcon.enabled = false;
+            owner.text = "Sahibi: Player";
+            kingdom.text = "Krall�k:Alfgard";
+            civilization.text = "Medeniyet:B�y�c�";
+            numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[1].SoldierAmount.ToString();
+        }
+        else if (selectedKingdom == 4)
+        {
+            FlagImage.sprite = Kingdom.Kingdoms[0].Flag;
+            WarIcon.enabled = false;
+            owner.text = "Sahibi: Player";
+            kingdom.text = "Krall�k:Arianopol";
+            civilization.text = "Medeniyet:�nsan";
+            numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[0].SoldierAmount.ToString();
+        }
+        else if (selectedKingdom == 5)
+        {
+            FlagImage.sprite = Kingdom.Kingdoms[3].Flag;
+            WarIcon.enabled = false;
+            owner.text = "Sahibi: Player";
+            kingdom.text = "Krall�k:Dhamuron";
+            civilization.text = "Medeniyet:C�ce";
+            numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[3].SoldierAmount.ToString();
+        }
+        else if (selectedKingdom == 6) 
+        {
+            FlagImage.sprite = Kingdom.Kingdoms[4].Flag;
+            WarIcon.enabled = false;
+            owner.text = "Sahibi: Player";
+            kingdom.text = "Krall�k:Lexion";
+            civilization.text = "Medeniyet:Elf";
+            numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[4].SoldierAmount.ToString();
+        }
+        else
+        {
+            FlagImage.sprite = Kingdom.Kingdoms[5].Flag;
+            WarIcon.enabled = false;
+            owner.text = "Sahibi: Player";
+            kingdom.text = "Krall�k:Zephrion";
+            civilization.text = "Medeniyet:Ölüler";
+            numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[5].SoldierAmount.ToString();
+        }
+    }
+
+    private void UpdatePhotonPlayerDetails(string kingdomName)
+    {
+        foreach (Player player in PhotonNetwork.PlayerList)
+        {
+            if (player.CustomProperties.TryGetValue("Kingdom", out object playerKingdom) && playerKingdom.ToString() == kingdomName)
+            {
+                playerNameText.text = $"Player Name: {player.CustomProperties["PlayerName"]}";
+                kingdomNameText.text = $"Kingdom: {kingdomName}";
+                foodAmountText.text = $"Food: {player.CustomProperties["FoodAmount"]}";
+                stoneAmountText.text = $"Stone: {player.CustomProperties["StoneAmount"]}";
+                goldAmountText.text = $"Gold: {player.CustomProperties["GoldAmount"]}";
+                woodAmountText.text = $"Wood: {player.CustomProperties["WoodAmount"]}";
+                ironAmountText.text = $"Iron: {player.CustomProperties["IronAmount"]}";
+                warPowerText.text = $"War Power: {player.CustomProperties["WarPower"]}";
+                /*
+                if(player.CustomProperties["PlayerName"] == OyuncununAdı)//Seçili bölgedeki playername benim adım ise
+                {
+                    WarIcon.enabled=false;
+                    ObservationImage.enabled=false;
+                }
+                else
+                {
                     WarIcon.enabled = true;
                     ObservationImage.enabled = true;
                     WarIcon.sprite = warSprite;
                     ObservationImage.sprite = observationSprite;
-                    owner.text = "Sahibi: Bilgisayar";
-                    kingdom.text = "Krall�k:Zephyrion";
-                    civilization.text = "Medeniyet:�l�ler";
-                    numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[5].SoldierAmount.ToString();
-
-                    break;
-                case "Arianopol":
-                    imageComponent.sprite = ArianopolLinePNG;
-
-                    FlagImage.sprite = Kingdom.Kingdoms[0].Flag;
-                    if (isYourKingdoms("Arianopol") == true)
-                    {
-                        WarIcon.enabled = false;
-                        ObservationImage.enabled = false;
-                    }
-                    else
-                    {
-                        WarIcon.enabled = true;
-                        ObservationImage.enabled = true;
-                        WarIcon.sprite = warSprite;
-                        ObservationImage.sprite = observationSprite;
-                    }
-                    owner.text = "Sahibi: " + findOwner("Arianopol");
-                    kingdom.text = "Krall�k:Arianopol";
-                    civilization.text = "Medeniyet:�nsan";
-                    numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[0].SoldierAmount.ToString();
-                    break;
-                case "Dhamuron":
-                    imageComponent.sprite = DhamuronLinePNG;
-
-                    FlagImage.sprite = Kingdom.Kingdoms[3].Flag;
-                    if (isYourKingdoms("Dhamuron") == true)
-                    {
-                        WarIcon.enabled = false;
-                        ObservationImage.enabled = false;
-                    }
-                    else
-                    {
-                        WarIcon.enabled = true;
-                        ObservationImage.enabled = true;
-                        WarIcon.sprite = warSprite;
-                        ObservationImage.sprite = observationSprite;
-                    }
-                    owner.text = "Sahibi: " + findOwner("Dhamuron");
-                    kingdom.text = "Krall�k:Dhamuron";
-                    civilization.text = "Medeniyet:C�ce";
-                    numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[3].SoldierAmount.ToString();
-
-                    break;
-                case "Akhadzria":
-                    imageComponent.sprite = AkhadzriaPNG;
-
-                    FlagImage.sprite = Kingdom.Kingdoms[2].Flag;
-                    if (isYourKingdoms("Akhadzria") == true)
-                    {
-                        WarIcon.enabled = false;
-                        ObservationImage.enabled = false;
-                    }
-                    else
-                    {
-                        WarIcon.enabled = true;
-                        ObservationImage.enabled = true;
-                        WarIcon.sprite = warSprite;
-                        ObservationImage.sprite = observationSprite;
-                    }
-                    owner.text = "Sahibi: " + findOwner("Akhadzria");
-                    kingdom.text = "Krall�k: Akhadzria";
-                    civilization.text = "Medeniyet: Ork";
-                    numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[2].SoldierAmount.ToString();
-
-                    break;
-                default:
-                    Debug.Log("T�klanan b�lge i�in bir g�rsel tan�mlanmad�.");
-                    break;
-            }
-
-            // �u an t�klanan b�lgeyi "lastClickedRegion" olarak sakla
-            lastClickedRegion = imageComponent;
-        }
-
-         // Photon'daki tüm oyuncuları kontrol et
-        foreach (Player player in PhotonNetwork.PlayerList)
-        {
-            // Oyuncunun custom properties'inde krallık adı arıyoruz
-            if (player.CustomProperties.ContainsKey("Kingdom") &&
-                player.CustomProperties["Kingdom"].ToString() == clickedKingdomName)
-            {
-                // Oyuncuyu bulduk, bilgilerini alalım
-                string playerName = player.CustomProperties["PlayerName"].ToString();
-                int foodAmount = (int)player.CustomProperties["FoodAmount"];
-                int stoneAmount = (int)player.CustomProperties["StoneAmount"];
-                int goldAmount = (int)player.CustomProperties["GoldAmount"];
-                int woodAmount = (int)player.CustomProperties["WoodAmount"];
-                int ironAmount = (int)player.CustomProperties["IronAmount"];
-                int warPower = (int)player.CustomProperties["WarPower"];
-
-                // Ekranda göstereceğimiz metinleri güncelle
-                playerNameText.text = "Player Name: " + playerName;
-                kingdomNameText.text = "Kingdom: " + clickedKingdomName;
-                foodAmountText.text = "Food: " + foodAmount;
-                stoneAmountText.text = "Stone: " + stoneAmount;
-                goldAmountText.text = "Gold: " + goldAmount;
-                woodAmountText.text = "Wood: " + woodAmount;
-                ironAmountText.text = "Iron: " + ironAmount;
-                warPowerText.text = "War Power: " + warPower;
-
-                break; // İlk bulunan oyuncuyu gösterdikten sonra durduruyoruz
+                }
+                */
+                break;
             }
         }
     }
 
+}
 
-    public bool isYourKingdoms(string name)
+public class KingdomDetails
+{
+    public string KingdomName { get; }
+    public string CivilizationName { get; }
+    public Color KingdomColor { get; }
+    public List<Image> RegionImages { get; }
+    public Sprite DefaultSprite { get; }
+
+    public KingdomDetails(string kingdomName, string civilizationName, Color kingdomColor, List<Image> regionImages, Sprite defaultSprite)
     {
-        foreach (Kingdom kingdom in Kingdom.Kingdoms)
-        {
-            if (kingdom.Owner == 1 && kingdom.Name == name)
-            {
-                return true;
-            }
-        }
-        return false;
+        KingdomName = kingdomName;
+        CivilizationName = civilizationName;
+        KingdomColor = kingdomColor;
+        RegionImages = regionImages;
+        DefaultSprite = defaultSprite;
     }
-
-public string findOwner(string kingdomName)
-{   
-
-    // Single-player kontrolü
-    if (ScreenTransitions2.ScreenNavigator.previousScreen == "Simple" || 
-        ScreenTransitions2.ScreenNavigator.previousScreen == "Mid" || 
-        ScreenTransitions2.ScreenNavigator.previousScreen == "Hard")
-    {
-         foreach (Kingdom kingdom in Kingdom.Kingdoms)
-        {
-            if (kingdom.Owner == 1 && kingdom.Name == name)
-            {
-                return "Player";
-            }
-        }
-        return "Bilgisayar";
-    }
-
-    else {
-        // Bulunduğunuz odayı yazdırıyoruz
-    Debug.Log($"Bulunduğunuz Oda: {PhotonNetwork.CurrentRoom.Name}");
-
-    // Photon odasındaki oyuncu listesini alıyoruz
-    Player[] players = PhotonNetwork.PlayerList;
-
-    // Odadaki tüm oyuncuların isimlerini ve krallıklarını yazdırıyoruz
-    foreach (Player player in players)
-    {
-        string playerName = player.CustomProperties.ContainsKey("PlayerName") 
-                            ? player.CustomProperties["PlayerName"].ToString() 
-                            : "Oyuncu Adı Yok";
-        string kingdom = player.CustomProperties.ContainsKey("Kingdom") 
-                         ? player.CustomProperties["Kingdom"].ToString() 
-                         : "Krallık Bilgisi Yok";
-
-        Debug.Log($"Oyuncu: {playerName}, Krallık: {kingdom}");
-    }
-
-    // Krallık ismi eşleşmesi olan bir kullanıcı var mı kontrol ediyoruz
-    foreach (Player player in players)
-    {
-        if (player.CustomProperties.ContainsKey("Kingdom") && 
-            player.CustomProperties["Kingdom"].ToString() == kingdomName)
-        {
-
-            // opponentName'e atama yapıyoruz
-                opponentName = player.CustomProperties.ContainsKey("PlayerName") 
-                               ? player.CustomProperties["PlayerName"].ToString() 
-                               : "Oyuncu Adı Yok";
-
-            // Eğer krallık ismi eşleşiyorsa oyuncunun adını döndür
-            return player.CustomProperties.ContainsKey("PlayerName") 
-                ? player.CustomProperties["PlayerName"].ToString() 
-                : "Oyuncu Adı Yok";
-
-                
-        }
-    }
-    // Eğer eşleşen bir oyuncu yoksa bilgisayar olarak döndür
-    return "Bilgisayar";
-    } 
 }
 
 
-    public void createDefaultPanel()
-    {   
 
-        
+/*
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using TMPro;
+using Photon.Pun;
+using Photon.Realtime;
+using System.Collections.Generic;
+
+public class RegionClickHandler : MonoBehaviour, IPointerClickHandler
+{
+    public Image LexionLinePNGImage, AlfgardLinePNGImage, ZephrionLinePNGImage, ArianopolLinePNGImage, DhamuronLinePNGImage, AkhadzriaPNGImage;
+    public Image FlagImage, WarIcon, ObservationImage;
+    public Sprite warSprite, observationSprite;
+    public TMP_Text owner, kingdom, civilization, numberOfSoldier;
+    public TextMeshProUGUI playerNameText, kingdomNameText, foodAmountText, stoneAmountText, goldAmountText, woodAmountText, ironAmountText, warPowerText;
+
+    public static string opponentName;
+    private static Image lastClickedRegion;
+    private static Dictionary<Image, Color> regionColors = new Dictionary<Image, Color>();
+
+    private static string LastClickedKingdom = "Empty";
+    int selectedKingdom = GetVariableFromHere.currentSpriteNum;
+
+    // Krallıklar ve onlara ait görseller için bir sözlük oluşturuluyor
+    private Dictionary<Image, string> regionOwnership = new Dictionary<Image, string>(); // Bölgeye göre sahiplik bilgisi
+    private Dictionary<string, KingdomDetails> kingdomDetails = new Dictionary<string, KingdomDetails>();
+
+    void Start()
+    {
+        createDefaultPanel();
+        InitializeRegionColors();
+        InitializeKingdomRegions();
+
+        // Fetih işlemleri
+        if (kingdomDetails.ContainsKey("Lexion") && kingdomDetails.ContainsKey("Alfgard"))
+        {
+            ConquerKingdom("Lexion ", "Alfgard");
+        }
+
+        if (kingdomDetails.ContainsKey("Lexion") && kingdomDetails.ContainsKey("Arianopol"))
+        {
+            ConquerKingdom("Lexion", "Arianopol");
+        }
+    }
+
+    private void InitializeRegionColors()
+    {
+        foreach (var region in FindObjectsOfType<Image>())
+        {
+            if (!regionColors.ContainsKey(region))
+            {
+                regionColors[region] = region.color;
+            }
+        }
+    }
+
+    private void InitializeKingdomRegions()
+    {
+        // Krallıklara ait bölgeler ve renkler
+        kingdomDetails.Add("Lexion", new KingdomDetails("Lexion","Elf", Color.green, new List<Image> { LexionLinePNGImage }, LexionLinePNGImage.sprite));
+        kingdomDetails.Add("Alfgard", new KingdomDetails("Alfgard","Büyücü", Color.blue, new List<Image> { AlfgardLinePNGImage }, AlfgardLinePNGImage.sprite));
+        kingdomDetails.Add("Zephrion", new KingdomDetails("Zephrion","Ölüler", Color.red, new List<Image> { ZephrionLinePNGImage }, ZephrionLinePNGImage.sprite));
+        kingdomDetails.Add("Arianopol", new KingdomDetails("Arianopol","İnsan", Color.yellow, new List<Image> { ArianopolLinePNGImage }, ArianopolLinePNGImage.sprite));
+        kingdomDetails.Add("Dhamuron", new KingdomDetails("Dhamuron","Cüceler", Color.cyan, new List<Image> { DhamuronLinePNGImage }, DhamuronLinePNGImage.sprite));
+        kingdomDetails.Add("Akhadzria", new KingdomDetails("Akhadzria","Orklar", Color.magenta, new List<Image> { AkhadzriaPNGImage }, AkhadzriaPNGImage.sprite));
+
+        // Bölge sahipliklerini başlat
+        foreach (var kvp in kingdomDetails)
+        {
+            foreach (var region in kvp.Value.RegionImages)
+            {
+                if (region != null && !regionOwnership.ContainsKey(region))
+                {
+                    regionOwnership[region] = kvp.Key; // Başlangıçta her bölge kendi krallığına ait
+                }
+            }
+        }
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        Image imageComponent = GetComponent<Image>();
+        string clickedKingdomName = GetKingdomByRegion(imageComponent);
+
+        if (LastClickedKingdom == "Empty")
+        {
+            LastClickedKingdom = clickedKingdomName;
+            SetKingdomColor(clickedKingdomName);
+        }
+        else if (LastClickedKingdom != clickedKingdomName)
+        {
+            ResetKingdomColor(LastClickedKingdom);
+            SetKingdomColor(clickedKingdomName);
+            LastClickedKingdom = clickedKingdomName;
+        }
+        else
+        {
+            ResetKingdomColor(clickedKingdomName);
+            LastClickedKingdom = "Empty";
+        }
+        UpdateRegionDetails(imageComponent);
+        UpdatePhotonPlayerDetails(clickedKingdomName);
+    }
+
+    private void ResetKingdomColor(string kingdomName)
+    {
+        foreach (var kvp in regionOwnership)
+        {
+            if (kvp.Value == kingdomName)
+            {
+                kvp.Key.color = Color.white;
+            }
+        }
+    }
+
+    private void SetKingdomColor(string kingdomName)
+    {
+        if (kingdomDetails.ContainsKey(kingdomName))
+        {
+            Color kingdomColor = kingdomDetails[kingdomName].KingdomColor;
+            foreach (var kvp in regionOwnership)
+            {
+                if (kvp.Value == kingdomName)
+                {
+                    kvp.Key.color = kingdomColor;
+                }
+            }
+        }
+    }
+
+    public void ConquerKingdom(string conqueringKingdom, string conqueredKingdom)
+    {
+        if (kingdomDetails.ContainsKey(conqueringKingdom) && kingdomDetails.ContainsKey(conqueredKingdom))
+        {
+            // Geçici bir liste kullanarak, değiştirme işlemini hatasız gerçekleştirme
+            var regionsToUpdate = new List<Image>();
+
+            foreach (var kvp in regionOwnership)
+            {
+                if (kvp.Value == conqueredKingdom)
+                {
+                    regionsToUpdate.Add(kvp.Key);
+                }
+            }
+
+            foreach (var region in regionsToUpdate)
+            {
+                regionOwnership[region] = conqueringKingdom;
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"Fetih işlemi başarısız: {conqueringKingdom} veya {conqueredKingdom} geçerli değil.");
+        }
+    }
+
+    private string GetKingdomByRegion(Image imageComponent)
+    {
+        return regionOwnership.ContainsKey(imageComponent) ? regionOwnership[imageComponent] : "Unknown";
+    }
+
+    private void UpdateRegionDetails(Image imageComponent)
+    {
+        // Bölgenin gerçek sahibi olan krallığı bul
+        string kingdomName = GetKingdomByRegion(imageComponent);
+
+        // Bölgenin detaylarını güncelleme işlemi
+        if (kingdomDetails.ContainsKey(kingdomName))
+        {
+            KingdomDetails details = kingdomDetails[kingdomName];
+            FlagImage.sprite = Resources.Load<Sprite>($"Flags/{kingdomName}Flag");
+            bool isPlayerOwned = isYourKingdoms(kingdomName);
+            WarIcon.enabled = !isPlayerOwned;
+            ObservationImage.enabled = !isPlayerOwned;
+
+            if (!isPlayerOwned)
+            {
+                WarIcon.sprite = warSprite;
+                ObservationImage.sprite = observationSprite;
+            }
+
+            owner.text = $"Sahibi: {findOwner(kingdomName)}";
+            kingdom.text = $"Krallık: {kingdomName}";
+            civilization.text = $"Medeniyet: {kingdomDetails[kingdomName].CivilizationName}";
+           //numberOfSoldier.text = $"Asker Sayısı: {Kingdom.Kingdoms[kingdomIndex].SoldierAmount}";
+
+
+        }
+        else
+        {
+            Debug.LogWarning("Bölge için eşleşme bulunamadı.");
+        }
+    }
+
+    public string findOwner(string kingdomName)
+    {
+
+        // Single-player kontrolü
+        if (ScreenTransitions2.ScreenNavigator.previousScreen == "Simple" ||
+            ScreenTransitions2.ScreenNavigator.previousScreen == "Mid" ||
+            ScreenTransitions2.ScreenNavigator.previousScreen == "Hard")
+        {
+            foreach (Kingdom kingdom in Kingdom.Kingdoms)
+            {
+                if (kingdom.Owner == 1 && kingdom.Name == name)
+                {
+                    return "Player";
+                }
+            }
+            return "Bilgisayar";
+        }
+
+        else
+        {
+            // Bulunduğunuz odayı yazdırıyoruz
+          //  Debug.Log($"Bulunduğunuz Oda: {PhotonNetwork.CurrentRoom.Name}");
+
+            // Photon odasındaki oyuncu listesini alıyoruz
+            Player[] players = PhotonNetwork.PlayerList;
+
+            // Odadaki tüm oyuncuların isimlerini ve krallıklarını yazdırıyoruz
+            foreach (Player player in players)
+            {
+                string playerName = player.CustomProperties.ContainsKey("PlayerName")
+                                    ? player.CustomProperties["PlayerName"].ToString()
+                                    : "Oyuncu Adı Yok";
+                string kingdom = player.CustomProperties.ContainsKey("Kingdom")
+                                 ? player.CustomProperties["Kingdom"].ToString()
+                                 : "Krallık Bilgisi Yok";
+
+                Debug.Log($"Oyuncu: {playerName}, Krallık: {kingdom}");
+            }
+
+            // Krallık ismi eşleşmesi olan bir kullanıcı var mı kontrol ediyoruz
+            foreach (Player player in players)
+            {
+                if (player.CustomProperties.ContainsKey("Kingdom") &&
+                    player.CustomProperties["Kingdom"].ToString() == kingdomName)
+                {
+
+                    // opponentName'e atama yapıyoruz
+                    opponentName = player.CustomProperties.ContainsKey("PlayerName")
+                                   ? player.CustomProperties["PlayerName"].ToString()
+                                   : "Oyuncu Adı Yok";
+
+                    // Eğer krallık ismi eşleşiyorsa oyuncunun adını döndür
+                    return player.CustomProperties.ContainsKey("PlayerName")
+                        ? player.CustomProperties["PlayerName"].ToString()
+                        : "Oyuncu Adı Yok";
+
+
+                }
+            }
+            // Eğer eşleşen bir oyuncu yoksa bilgisayar olarak döndür
+            return "Bilgisayar";
+        }
+    }
+
+    public void createDefaultPanel()
+    {
+
+
         if (selectedKingdom == 2)
         {
             FlagImage.sprite = Kingdom.Kingdoms[2].Flag;
@@ -369,53 +696,55 @@ public string findOwner(string kingdomName)
         }
     }
 
-    public void createDefaultPanel2()
-    {   
-        if (selectedKingdom2 == 2)
+    private void UpdatePhotonPlayerDetails(string kingdomName)
+    {
+        foreach (Player player in PhotonNetwork.PlayerList)
         {
-            FlagImage.sprite = Kingdom.Kingdoms[2].Flag;
-            WarIcon.enabled = false;
-            owner.text = "Sahibi: Player";
-            kingdom.text = "Krall�k: Akhadzria";
-            civilization.text = "Medeniyet: Ork";
-            numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[2].SoldierAmount.ToString();
-        }
-        else if (selectedKingdom2 == 3)
-        {
-            FlagImage.sprite = Kingdom.Kingdoms[1].Flag;
-            WarIcon.enabled = false;
-            owner.text = "Sahibi: Player";
-            kingdom.text = "Krall�k:Alfgard";
-            civilization.text = "Medeniyet:B�y�c�";
-            numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[1].SoldierAmount.ToString();
-        }
-        else if (selectedKingdom2 == 4)
-        {
-            FlagImage.sprite = Kingdom.Kingdoms[0].Flag;
-            WarIcon.enabled = false;
-            owner.text = "Sahibi: Player";
-            kingdom.text = "Krall�k:Arianopol";
-            civilization.text = "Medeniyet:�nsan";
-            numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[0].SoldierAmount.ToString();
-        }
-        else if (selectedKingdom2 == 5)
-        {
-            FlagImage.sprite = Kingdom.Kingdoms[3].Flag;
-            WarIcon.enabled = false;
-            owner.text = "Sahibi: Player";
-            kingdom.text = "Krall�k:Dhamuron";
-            civilization.text = "Medeniyet:C�ce";
-            numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[3].SoldierAmount.ToString();
-        }
-        else
-        {
-            FlagImage.sprite = Kingdom.Kingdoms[4].Flag;
-            WarIcon.enabled = false;
-            owner.text = "Sahibi: Player";
-            kingdom.text = "Krall�k:Lexion";
-            civilization.text = "Medeniyet:Elf";
-            numberOfSoldier.text = "Asker Say�s�: " + Kingdom.Kingdoms[4].SoldierAmount.ToString();
+            if (player.CustomProperties.TryGetValue("Kingdom", out object playerKingdom) && playerKingdom.ToString() == kingdomName)
+            {
+                playerNameText.text = $"Player Name: {player.CustomProperties["PlayerName"]}";
+                kingdomNameText.text = $"Kingdom: {kingdomName}";
+                foodAmountText.text = $"Food: {player.CustomProperties["FoodAmount"]}";
+                stoneAmountText.text = $"Stone: {player.CustomProperties["StoneAmount"]}";
+                goldAmountText.text = $"Gold: {player.CustomProperties["GoldAmount"]}";
+                woodAmountText.text = $"Wood: {player.CustomProperties["WoodAmount"]}";
+                ironAmountText.text = $"Iron: {player.CustomProperties["IronAmount"]}";
+                warPowerText.text = $"War Power: {player.CustomProperties["WarPower"]}";
+                break;
+            }
         }
     }
 
+    private bool isYourKingdoms(string name)
+    {
+        foreach (Kingdom kingdom in Kingdom.Kingdoms)
+        {
+            if (kingdom.Owner == 1 && kingdom.Name == name)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
+
+public class KingdomDetails
+{
+    public string KingdomName { get; }
+    public string CivilizationName { get; }
+    public Color KingdomColor { get; }
+    public List<Image> RegionImages { get; }
+    public Sprite DefaultSprite { get; }
+
+    public KingdomDetails(string kingdomName,string civilizationName, Color kingdomColor, List<Image> regionImages, Sprite defaultSprite)
+    {
+        KingdomName = kingdomName;
+        CivilizationName = civilizationName;
+        KingdomColor = kingdomColor;
+        RegionImages = regionImages;
+        DefaultSprite = defaultSprite;
+    }
+}
+
+*/
