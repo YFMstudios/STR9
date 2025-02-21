@@ -2773,7 +2773,6 @@ GameObject:
   - component: {fileID: 1420831975419567356}
   - component: {fileID: 5038679723942575792}
   - component: {fileID: 7488446255069360012}
-  - component: {fileID: 3110178420842169312}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -2937,7 +2936,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   selectableLayer:
     serializedVersion: 2
-    m_Bits: 896
+    m_Bits: 128
 --- !u!114 &3781526677606309794
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3019,22 +3018,6 @@ MonoBehaviour:
   expBarSlider: {fileID: 0}
   levelText2D: {fileID: 0}
   levelText3D: {fileID: 3664177490620084665}
---- !u!114 &3110178420842169312
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2910761185380661856}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 93d34948dc125ee42b49375e65cf599e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetEnemy: {fileID: 0}
-  performRangedAttack: 1
-  attackProjectile: {fileID: 8863378062888302169, guid: ac2e95830b8c2ea4f93f670f99ac9feb, type: 3}
-  attackSpawnPoint: {fileID: 2453490785864793758}
 --- !u!1 &2992725673127572966
 GameObject:
   m_ObjectHideFlags: 0

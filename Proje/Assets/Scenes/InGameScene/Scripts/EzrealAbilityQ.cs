@@ -79,7 +79,7 @@ public class EzrealAbilityQ : MonoBehaviour
         if (!manaSystem.CanAffordAbility(manaCost)) return;
 
         movement.StopMovement();
-        manaSystem.UseAbility(manaCost);
+        manaSystem.UseAbility(manaCost); // Mana harcaması burada yapılacak
         StartCooldown();
         RotateCharacter();
 
@@ -89,6 +89,7 @@ public class EzrealAbilityQ : MonoBehaviour
         anim = GetComponent<Animator>();
         anim.SetTrigger("Ezreal Q");
     }
+
 
     // Rotate the character to face the aim direction
     private void RotateCharacter()

@@ -52,7 +52,7 @@ public class ManaSystem : MonoBehaviour
         }
         if (manaText2d != null)
         {
-            manaText2d.text = Mathf.RoundToInt(currentMana).ToString() + "/" + maxMana;  // 2D mana metnini g�ncelle
+            manaText2d.text = Mathf.RoundToInt(currentMana).ToString() + " / " + maxMana;  // 2D mana metnini g�ncelle
         }
     }
 

@@ -4,21 +4,21 @@ using UnityEngine;
 
 public class BilboardCanvas : MonoBehaviour
 {
-    Transform cameraTransform; // Kameranýn transform bilgisi
+    Transform cameraTransform; // Kameranï¿½n transform bilgisi
 
     // Start is called before the first frame update
     void Start()
     {
-        cameraTransform = Camera.main.transform; // Sahnedeki ana kameranýn transformunu al
+        cameraTransform = Camera.main.transform; // Sahnedeki ana kameranï¿½n transformunu al
     }
 
     // Update is called once per frame
     void Update()
     {
-        // Canvas'in her zaman kameraya doðru bakmasýný saðlar
-        // transform.LookAt ile Canvas'in z ekseni kameraya doðru yönlendirilir
-        // cameraTransform.rotation * -Vector3.forward, kameranýn bakýþ yönünün tersi yönde bir vektör oluþturur
-        // cameraTransform.rotation * Vector3.up, kameranýn yukarý doðru bakýþ yönünü belirler
+        // Canvas'in her zaman kameraya doï¿½ru bakmasï¿½nï¿½ saï¿½lar
+        // transform.LookAt ile Canvas'in z ekseni kameraya doï¿½ru yï¿½nlendirilir
+        // cameraTransform.rotation * -Vector3.forward, kameranï¿½n bakï¿½ï¿½ yï¿½nï¿½nï¿½n tersi yï¿½nde bir vektï¿½r oluï¿½turur
+        // cameraTransform.rotation * Vector3.up, kameranï¿½n yukarï¿½ doï¿½ru bakï¿½ï¿½ yï¿½nï¿½nï¿½ belirler
         transform.LookAt(transform.position + cameraTransform.rotation * -Vector3.forward, cameraTransform.rotation * Vector3.up);
     }
 }
