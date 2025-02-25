@@ -32,17 +32,39 @@ public class MeleeCombat : MonoBehaviour
 
         targetEnemy = moveScript.targetEnemy;  // Hedef düşmanı güncelle (Movement scriptinden alınan)
 
-        // Eğer hedeflenen düşman varsa ve melee saldırı yapılıyorsa ve saldırı zamanı geldiyse
+        if (targetEnemy != null)
+        {
+            Debug.Log("Target enemy found: " + targetEnemy.name); // Hedef doğru şekilde alınıyor mu kontrol et
+        }
+        else
+        {
+            Debug.LogWarning("Target enemy is null!");
+        }
+
+        // Eğer hedeflenen düşman varsa, melee saldırı yapılabiliyorsa ve saldırı zamanı geldiyse
         if (targetEnemy != null && performMeleeAttack && Time.time > nextAttackTime)
         {
-            // Oyuncu düşmandan belirli bir mesafede ise
-            if (Vector3.Distance(transform.position, targetEnemy.transform.position) <= moveScript.stoppingDistance)
+            // Mesafeyi hesapla
+            float distance = Vector3.Distance(transform.position, targetEnemy.transform.position);
+
+            // Debug: Mesafeyi yazdır
+            Debug.Log("Mesafe: " + distance + " StoppingDistance: 4");
+
+            // Eğer mesafe 4'e eşit ya da küçükse
+            if (distance <= 3.5f)  // Mesafeyi 4 olarak belirledik
             {
-                // Melee saldırı aralığını başlat
+                Debug.Log("Yeterli mesafeye gelindi, saldırı başlayacak.");
                 StartCoroutine(MeleeAttackInterval());
+            }
+            else
+            {
+                Debug.Log("Hedefe yaklaşılacak. Mesafe: " + distance);
             }
         }
     }
+
+
+
 
     // Melee saldırı aralığını yöneten Coroutine
     private IEnumerator MeleeAttackInterval()
@@ -67,31 +89,23 @@ public class MeleeCombat : MonoBehaviour
     // Animasyon eventinde çağrılan fonksiyon
     private void MeleeAttack()
     {
-        // Düşman hala hayattaysa hasarı uygula
+        Debug.Log("MeleeAttack çağrıldı! Hedef: " + targetEnemy.name);
+
         if (targetEnemy != null)
         {
-            // Önce Stats bileşenini kontrol et
+            // Eğer hedef düşman bir minyon veya başka bir oyuncu ise
             Stats enemyStats = targetEnemy.GetComponent<Stats>();
             if (enemyStats != null)
             {
                 enemyStats.TakeDamage(gameObject, stats.damage);  // Kendi hasarını düşmana uygula
             }
+            // Eğer hedef bir minyon ise, ObjectiveStats kontrol et
             else
             {
-                // Eğer Stats bileşeni yoksa ObjectiveStats bileşenini kontrol et
                 ObjectiveStats enemyObjectiveStats = targetEnemy.GetComponent<ObjectiveStats>();
                 if (enemyObjectiveStats != null)
                 {
-                    enemyObjectiveStats.TakeDamage(stats.damage);  // Hasarı ObjectiveStats'a uygula
-                }
-                else if (targetEnemy.CompareTag("EnemyTurret"))  // Turret tag'ini kontrol et
-                {
-                    // Turret'lere de ObjectiveStats üzerinden hasar uygula
-                    ObjectiveStats turretStats = targetEnemy.GetComponent<ObjectiveStats>();
-                    if (turretStats != null)
-                    {
-                        turretStats.TakeDamage(stats.damage);  // Turret'e hasar ver
-                    }
+                    enemyObjectiveStats.TakeDamage(stats.damage);  // Minyon veya başka bir objeye hasar uygula
                 }
             }
         }
@@ -105,4 +119,5 @@ public class MeleeCombat : MonoBehaviour
         // Bir sonraki saldırıya hazır ol
         performMeleeAttack = true;
     }
+
 }

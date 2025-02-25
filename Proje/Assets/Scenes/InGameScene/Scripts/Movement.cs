@@ -51,10 +51,11 @@ public class Movement : MonoBehaviour
                 {
                     MoveToPosition(hit.point);      // Belirlenen noktaya hareket et
                 }
-                else if (hit.collider.CompareTag("Enemy") || hit.collider.CompareTag("EnemyMinion") || hit.collider.CompareTag("EnemyTurret"))  // Eğer tıklanan düşman veya turret ise
+                else if (hit.collider.CompareTag("Enemy") || hit.collider.CompareTag("EnemyMinion") || hit.collider.CompareTag("EnemyTurret"))
                 {
-                    MoveTowardsEnemy(hit.collider.gameObject);  // Düşmana veya turret'e doğru hareket et
+                    MoveTowardsEnemy(hit.collider.gameObject);
                 }
+
             }
         }
 
