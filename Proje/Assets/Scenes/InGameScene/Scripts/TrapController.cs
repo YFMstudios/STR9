@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class TrapController : MonoBehaviour
 {
-    public int damageAmount = 50;       // Vereceği hasar miktarı
+    public int damageAmount = 15;       // Vereceği hasar miktarı
     public GameObject trapVisual;       // Tuzağın görsel objesi (visual kısmını bu objeye bağla)
 
     public float activationDistance = 2f; // Mesafe kontrolü için

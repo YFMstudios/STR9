@@ -17,7 +17,7 @@ public class MinionMeleeCombat : MonoBehaviour
         stats = GetComponent<ObjectiveStats>(); // ObjectiveStats bile�eni al�n�rz
         minionAI = GetComponent<MinionAI>();   // MinionAI bile�eni al�n�r
 
-        attackRange = minionAI.stopDistance + 0.5f; // Sald�r� menzili, durma mesafesine eklenir
+        attackRange = minionAI.stopDistance + 1.5f; // Sald�r� menzili, durma mesafesine eklenir
         attackDamage = stats.damage;                // Sald�r� hasar�, ObjectiveStats bile�eninden al�n�r
     }
 
