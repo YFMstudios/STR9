@@ -10,8 +10,6 @@ public class NextGame : MonoBehaviourPunCallbacks
 {
     private string opponentName; // Rakibin ismi
 
-    
-
     // Butona tıklandığında çalışacak olan fonksiyon
     public void goWarScene()
     {
@@ -26,31 +24,26 @@ public class NextGame : MonoBehaviourPunCallbacks
             // Single-player modunda, direkt 7. sahneye geçiş yap
             Debug.Log("Single-player modunda. 7. ekrana yönlendiriliyor...");
             GoToWarScene();
-            return; // Single-player kontrolü sağlandıysa geri kalan işlemler yapılmaz
+            return; 
         }
 
-        // Eğer Single-player değilse, mevcut multiplayer işlemleri devam eder
+        // Multiplayer modunda
         Debug.Log("Multiplayer modunda. Rakip kontrolü ve diğer işlemler başlatılıyor...");
 
-        // RegionClickHandler'ın opponentName özelliğinin null olup olmadığını kontrol et
-        if (RegionClickHandler.opponentName != null)
+        // RegionClickHandler'ın opponentName özelliğini al, null olsa bile engel çıkarmadan devam edelim
+        opponentName = RegionClickHandler.opponentName;
+        if (opponentName == null)
         {
-            opponentName = RegionClickHandler.opponentName;
-            Debug.Log("Opponent Name (Savunan Kişi): " + opponentName);
+            Debug.LogWarning("Rakip adı null ancak yine de 7. sahneye geçiyoruz...");
         }
         else
         {
-            Debug.LogError("Rakip adı null! RegionClickHandler'ı kontrol edin.");
-            return; // opponentName null ise fonksiyonu erken sonlandırıyoruz
+            Debug.Log("Opponent Name (Savunan Kişi): " + opponentName);
+            // Oda bilgilerine war özelliğini opponentName ile ekle
+            SetWarInfo(opponentName);
         }
 
-        // Oda bilgilerine war özelliğini opponentName ile ekliyoruz
-        Debug.Log("War bilgileri odada güncelleniyor...");
-        SetWarInfo(opponentName);
-
-        // War durumu her iki oyuncu için true olarak ayarlanıyor
-        Debug.Log("War durumu odada güncelleniyor...");
-        PhotonNetwork.Disconnect();
+        // 7. sahneye git
         GoToWarScene();
     }
 
@@ -67,10 +60,9 @@ public class NextGame : MonoBehaviourPunCallbacks
         // Oda bilgilerini güncelliyoruz
         PhotonNetwork.CurrentRoom.SetCustomProperties(new ExitGames.Client.Photon.Hashtable
         {
-            { "war", warInfo } // 'war' bilgisini güncelle
+            { "war", warInfo }
         });
 
-        // Debug: War bilgisi güncellendi
         Debug.Log("War bilgileri odada güncellendi. opponentName: " + opponentName);
     }
 
@@ -79,18 +71,12 @@ public class NextGame : MonoBehaviourPunCallbacks
     {
         try
         {
-            // Debug: Sahne yükleniyor
             Debug.Log("7. sahneye yönlendiriliyor...");
-            
-            // Sahne yükleniyor
-            SceneManager.LoadScene(7); // 7. sahne
+            SceneManager.LoadScene(7);
         }
         catch (System.Exception e)
         {
-            // Eğer sahne yüklenirken bir hata olursa
             Debug.LogError("Sahne yüklenirken hata oluştu: " + e.Message);
         }
     }
-
-    
 }

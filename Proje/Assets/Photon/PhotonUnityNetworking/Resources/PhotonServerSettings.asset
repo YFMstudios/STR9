@@ -44,6 +44,9 @@ MonoBehaviour:
   - BroadcastInGameMessage
   - SetWarStatusRPC
   - StartWarForPlayers
+  - RPC_SpawnMinionLocally
+  - RPC_HandleDeath
+  - RPC_TakeDamageAll
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

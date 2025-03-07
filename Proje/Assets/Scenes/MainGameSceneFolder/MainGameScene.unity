@@ -17109,12 +17109,12 @@ MonoBehaviour:
   ArianopolLinePNGImage: {fileID: 195365619}
   DhamuronLinePNGImage: {fileID: 954679261}
   AkhadzriaPNGImage: {fileID: 1819740958}
-  LexionTMP: {fileID: 0}
-  AlfgardTMP: {fileID: 0}
-  ZephrionTMP: {fileID: 0}
-  ArianopolTMP: {fileID: 0}
-  DhamuronTMP: {fileID: 0}
-  AkhadzriaTMP: {fileID: 0}
+  LexionTMP: {fileID: 436858305}
+  AlfgardTMP: {fileID: 29222202}
+  ZephrionTMP: {fileID: 2130372194}
+  ArianopolTMP: {fileID: 193385886}
+  DhamuronTMP: {fileID: 361135386}
+  AkhadzriaTMP: {fileID: 1294800183}
   FlagImage: {fileID: 1972852163}
   WarIcon: {fileID: 398410885}
   ObservationImage: {fileID: 1337373507}
