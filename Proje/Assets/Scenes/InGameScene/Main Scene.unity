@@ -5900,7 +5900,7 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 5785139589738350057}
-  sceneViewId: 6
+  sceneViewId: 4
   InstantiationId: 0
   isRuntimeInstantiated: 0
 --- !u!1001 &6747945267247766990
@@ -6457,6 +6457,14 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9073340213186747717, guid: 262b6990c7603ba42b2c13e80ec185d4, type: 3}
+      propertyPath: sceneViewId
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 9073340213186747717, guid: 262b6990c7603ba42b2c13e80ec185d4, type: 3}
+      propertyPath: ObservedComponents.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9100597253142538842, guid: 262b6990c7603ba42b2c13e80ec185d4, type: 3}
       propertyPath: m_LocalScale.x
       value: 1.25
@@ -6638,7 +6646,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3673321132237095353, guid: 55917729b23366f44b1d362ac5c91a61, type: 3}
       propertyPath: meleeMinionPrefabName
-      value: 'Minions/MeleeMinion '
+      value: Minions/MeleeMinion
       objectReference: {fileID: 0}
     - target: {fileID: 3673321132237095353, guid: 55917729b23366f44b1d362ac5c91a61, type: 3}
       propertyPath: rangedMinionPrefabName
@@ -7041,7 +7049,7 @@ MonoBehaviour:
   observableSearch: 2
   ObservedComponents:
   - {fileID: 8908619924040436904}
-  sceneViewId: 4
+  sceneViewId: 6
   InstantiationId: 0
   isRuntimeInstantiated: 0
 --- !u!1001 &8986773110167954279

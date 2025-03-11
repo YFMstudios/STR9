@@ -52,9 +52,9 @@ GameObject:
   - component: {fileID: -8326526324587816037}
   - component: {fileID: 3942371897833882400}
   - component: {fileID: 8570159554113108331}
-  - component: {fileID: -6009286046281953101}
-  - component: {fileID: 6898110661260837466}
-  - component: {fileID: -133916587124060094}
+  - component: {fileID: -6920252086100749652}
+  - component: {fileID: 8055336912652858320}
+  - component: {fileID: 7687144928425463360}
   m_Layer: 7
   m_Name: EnemyRangedMinion
   m_TagString: EnemyMinion
@@ -1519,7 +1519,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29ea8339f3c87c249abaaa0967ffa43f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &-6009286046281953101
+--- !u!114 &-6920252086100749652
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1538,12 +1538,12 @@ MonoBehaviour:
   OwnershipTransfer: 1
   observableSearch: 2
   ObservedComponents:
-  - {fileID: 6898110661260837466}
-  - {fileID: -133916587124060094}
+  - {fileID: 8055336912652858320}
+  - {fileID: 7687144928425463360}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &6898110661260837466
+--- !u!114 &8055336912652858320
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1559,7 +1559,7 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 0
---- !u!114 &-133916587124060094
+--- !u!114 &7687144928425463360
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1578,13 +1578,13 @@ MonoBehaviour:
     SynchronizeType: 1
     Name: isAttacking
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 0
     Name: isWalking
   - Type: 9
-    SynchronizeType: 1
+    SynchronizeType: 0
     Name: isDead
   m_SynchronizeLayers:
-  - SynchronizeType: 1
+  - SynchronizeType: 0
     LayerIndex: 0
 --- !u!1 &3773286802935099457
 GameObject:

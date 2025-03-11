@@ -1,74 +1,78 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
-public class EzrealAbilityQProjectile : MonoBehaviour
+[RequireComponent(typeof(PhotonView))]
+public class EzrealAbilityQProjectile : MonoBehaviourPun
 {
-    public float speed = 10f; // The speed at which the projectile moves
-    public float maxDistance = 100f; // Maximum distance the projectile can travel before being destroyed
-    public LayerMask hitLayers; // Determines which layers the projectile can hit
-    public float damage; // The amount of damage the projectile deals
+    [Header("Projectile Settings")]
+    public float speed = 10f;         // Merminin hızı
+    public float maxDistance = 100f;  // Max mesafe
+    public float damage = 50f;        // Hasar
+    public LayerMask hitLayers;       // Hangi layer'lara çarpacak?
 
-    private Vector3 startPosition; // The starting position of the projectile
+    private Vector3 startPosition;    // Başlangıç konumu
 
     void Start()
     {
-        startPosition = transform.position; // Store the starting position of the projectile
+        startPosition = transform.position;
 
-        // Ensure the projectile has a Rigidbody component
+        // Rigidbody varsa, kinematic yap
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null)
-        {
-            rb.isKinematic = true; // Make Rigidbody kinematic for precise movement control
-        }
+            rb.isKinematic = true;
     }
 
     void Update()
     {
-        MoveProjectile(); // Move the projectile forward
-        CheckDistanceTravelled(); // Check if the projectile has reached its max distance
+        // Sadece sahibi (IsMine) mermiyi hareket ettirsin
+        if (!photonView.IsMine) return;
+
+        MoveProjectile();
+        CheckDistanceTravelled();
     }
 
-    // Moves the projectile forward based on its speed
     private void MoveProjectile()
     {
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
     }
 
-    // Checks if the projectile has traveled its maximum distance and destroys it if so
     private void CheckDistanceTravelled()
     {
-        if (Vector3.Distance(startPosition, transform.position) >= maxDistance)
+        float traveled = Vector3.Distance(startPosition, transform.position);
+        if (traveled >= maxDistance)
         {
-            Destroy(gameObject); // Destroy the projectile
+            PhotonNetwork.Destroy(gameObject);
         }
     }
 
-    // Handles collision with other objects using triggers
-    void OnTriggerEnter(Collider other)
+    // OnTriggerEnter tetiklenirse hasar ver ve yok ol
+    private void OnTriggerEnter(Collider other)
     {
-        // Check if the collided object is in the specified hitLayers
-        if (((1 << other.gameObject.layer) & hitLayers) != 0)
-        {
-            // Attempt to get the Stats component from the collided object and apply damage
-            Stats targetStats = other.gameObject.GetComponent<Stats>();
-            if (targetStats != null)
-            {
-                targetStats.TakeDamage(other.gameObject, damage); // Apply damage
-            }
+        if (!photonView.IsMine) return;
 
-            Destroy(gameObject); // Destroy the projectile upon hitting a valid target
-        }
-        if (((1 << other.gameObject.layer) & hitLayers) != 0)
+        // Sadece tanımladığımız layer'lara değerse
+        if (((1 << other.gameObject.layer) & hitLayers.value) == 0)
         {
-            // Attempt to get the Stats component from the collided object and apply damage
-            ObjectiveStats targetStats2 = other.gameObject.GetComponent<ObjectiveStats>();
-            if (targetStats2 != null)
-            {
-                targetStats2.TakeDamage(damage); // Apply damage
-            }
-
-            Destroy(gameObject); // Destroy the projectile upon hitting a valid target
+            return; // Bu layer'a çarpmayı umursamıyoruz
         }
+
+        // "Stats" script'i var mı?
+        Stats targetStats = other.GetComponent<Stats>();
+        if (targetStats != null)
+        {
+            targetStats.TakeDamage(damage);
+        }
+        else
+        {
+            // "ObjectiveStats" script'i var mı?
+            ObjectiveStats targetObjStats = other.GetComponent<ObjectiveStats>();
+            if (targetObjStats != null)
+            {
+                targetObjStats.TakeDamage(damage);
+            }
+        }
+
+        // Herkeste mermiyi yok et
+        PhotonNetwork.Destroy(gameObject);
     }
 }

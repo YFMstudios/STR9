@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 814061041087435803}
   - component: {fileID: 6983238833392866892}
   - component: {fileID: -2785198080916063272}
-  - component: {fileID: 2012390860119508644}
-  - component: {fileID: -6000320006820796437}
+  - component: {fileID: 2395721028307953053}
+  - component: {fileID: 4039580214023841706}
   m_Layer: 0
   m_Name: AllyRangedMinionProjectile
   m_TagString: Untagged
@@ -121,7 +121,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 10
---- !u!114 &2012390860119508644
+--- !u!114 &2395721028307953053
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -140,11 +140,11 @@ MonoBehaviour:
   OwnershipTransfer: 1
   observableSearch: 2
   ObservedComponents:
-  - {fileID: -6000320006820796437}
+  - {fileID: 4039580214023841706}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &-6000320006820796437
+--- !u!114 &4039580214023841706
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

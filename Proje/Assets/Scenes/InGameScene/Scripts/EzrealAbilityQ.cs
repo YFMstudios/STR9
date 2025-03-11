@@ -1,19 +1,20 @@
 using UnityEngine;
 using UnityEngine.UI;
+using Photon.Pun;
 
-// Require components that are essential for this script to function properly
 [RequireComponent(typeof(Movement))]
 [RequireComponent(typeof(ManaSystem))]
-public class EzrealAbilityQ : MonoBehaviour
+[RequireComponent(typeof(PhotonView))]
+public class EzrealAbilityQ : MonoBehaviourPun
 {
     [Header("Ability Values")]
-    public KeyCode abilityKey;
-    public float cooldown = 5f;
-    public float manaCost = 30f;
+    public KeyCode abilityKey = KeyCode.Q;  // Yetenek tuşu
+    public float cooldown = 5f;            // Cooldown süresi
+    public float manaCost = 30f;          // Mana maliyeti
 
     [Header("Projectile")]
-    public Transform spawnPoint;
-    public GameObject skillshotPrefab;
+    public Transform spawnPoint;          // Merminin çıkacağı nokta
+    public GameObject skillshotPrefab;    // Mermi prefab (Resources içinde PhotonView'lı)
 
     [Header("UI Elements 2D")]
     public Image abilityImageMain;
@@ -41,57 +42,99 @@ public class EzrealAbilityQ : MonoBehaviour
 
     void Update()
     {
+        // Sadece local oyuncu (IsMine) input alır ve UI kontrol eder
+        if (!photonView.IsMine) 
+        {
+            return; 
+        }
+
         HandleInput();
         UpdateCooldown();
         UpdateUI();
 
-        if (skillshotIndicator.enabled) UpdateSkillshotIndicator();
+        if (skillshotIndicator != null && skillshotIndicator.enabled)
+        {
+            UpdateSkillshotIndicator();
+        }
     }
 
-    // Cache frequently used components to improve performance
+    // Sık kullandığımız bileşenleri önceden referans alıyoruz
     private void CacheComponents()
     {
         manaSystem = GetComponent<ManaSystem>();
         movement = GetComponent<Movement>();
         mainCamera = Camera.main;
 
-        abilityCanvas ??= GetComponentInChildren<Canvas>();
-        skillshotIndicator ??= GetComponentInChildren<Image>();
+        if (abilityCanvas == null)
+            abilityCanvas = GetComponentInChildren<Canvas>();
+
+        if (skillshotIndicator == null)
+            skillshotIndicator = GetComponentInChildren<Image>();
+
+        anim = GetComponent<Animator>();
     }
 
-    // Handle user input for activating the ability and aiming
+    // Kullanıcı inputlarını dinleme
     private void HandleInput()
     {
+        // Yetenek tuşuna basıldı ve cooldown yok ve yeterli mana varsa
         if (Input.GetKeyDown(abilityKey) && !isCooldown && manaSystem.CanAffordAbility(manaCost))
         {
             EnableAimingMode(true);
         }
 
-        if (skillshotIndicator.enabled && Input.GetMouseButtonDown(0))
+        // Skillshot nişangahı açıkken sol tık -> Ateşleme
+        if (skillshotIndicator != null && skillshotIndicator.enabled && Input.GetMouseButtonDown(0))
         {
             FireSkillshot();
         }
     }
 
-    // Fire the skillshot ability
+    // Yetenek ateşlendiğinde
     private void FireSkillshot()
     {
-        if (!manaSystem.CanAffordAbility(manaCost)) return;
+        if (!manaSystem.CanAffordAbility(manaCost))
+            return;
 
+        // Hareketi durdur
         movement.StopMovement();
-        manaSystem.UseAbility(manaCost); // Mana harcaması burada yapılacak
+
+        // Mana düşür
+        manaSystem.UseAbility(manaCost);
+
+        // Cooldown başlat
         StartCooldown();
+
+        // Karakteri bakış yönüne döndür
         RotateCharacter();
 
+        // Hedef alma modunu kapat
         EnableAimingMode(false);
         Cursor.visible = true;
 
-        anim = GetComponent<Animator>();
-        anim.SetTrigger("Ezreal Q");
+        // Animasyon tetikle
+        if (anim != null)
+        {
+            anim.SetTrigger("Ezreal Q");
+        }
     }
 
+    /// <summary>
+    /// Animasyonda "Attack" anına event ekleyerek bu metodu çağırabilirsiniz.
+    /// Mermiyi ağ üzerinde üretir (PhotonNetwork.Instantiate).
+    /// </summary>
+    public void AimAndFireProjectile()
+    {
+        if (skillshotPrefab == null || spawnPoint == null) return;
 
-    // Rotate the character to face the aim direction
+        // Mermiyi herkesin sahnesinde oluşturur
+        PhotonNetwork.Instantiate(skillshotPrefab.name, spawnPoint.position, spawnPoint.rotation);
+
+        // Karakter tekrar hareket edebilir
+        movement.ResumeMovement();
+    }
+
+    // Karakteri farenin gösterdiği yöne çevir
     private void RotateCharacter()
     {
         Vector3 direction = CalculateAimDirection();
@@ -101,24 +144,7 @@ public class EzrealAbilityQ : MonoBehaviour
         }
     }
 
-    // Start the cooldown timer for the ability
-    private void StartCooldown()
-    {
-        isCooldown = true;
-        currentCooldown = cooldown;
-    }
-
-    // Instantiate the projectile at the correct position and rotation
-    public void AimAndFireProjectile()
-    {
-        if (skillshotPrefab)
-        {
-            Instantiate(skillshotPrefab, spawnPoint.position, spawnPoint.rotation);
-            movement.ResumeMovement();
-        }
-    }
-
-    // Calculate the direction of the aim based on mouse position
+    // Fare raycast'i ile hedef noktayı bul, y'yi sıfırla
     private Vector3 CalculateAimDirection()
     {
         Vector3 direction = (aimPosition - transform.position).normalized;
@@ -126,30 +152,50 @@ public class EzrealAbilityQ : MonoBehaviour
         return direction;
     }
 
-    // Update the cooldown timer and UI elements accordingly
+    // Cooldown sürecini başlatır
+    private void StartCooldown()
+    {
+        isCooldown = true;
+        currentCooldown = cooldown;
+    }
+
     private void UpdateCooldown()
     {
         if (!isCooldown) return;
 
         currentCooldown -= Time.deltaTime;
-        isCooldown = currentCooldown > 0;
+        if (currentCooldown <= 0f)
+        {
+            currentCooldown = 0f;
+            isCooldown = false;
+        }
     }
 
-    // Update the UI elements based on ability state
+    // UI güncelleme (sadece local)
     private void UpdateUI()
     {
-        if (abilityImageGreyed)
+        if (abilityImageGreyed != null)
         {
             abilityImageGreyed.color = isCooldown ? Color.grey : Color.white;
             abilityImageGreyed.fillAmount = isCooldown ? currentCooldown / cooldown : 0;
+        }
+
+        if (abilityImageMain != null)
+        {
             abilityImageMain.color = manaSystem.CanAffordAbility(manaCost) ? Color.white : Color.red;
         }
-        abilityText.text = isCooldown ? Mathf.Ceil(currentCooldown).ToString() : "";
+
+        if (abilityText != null)
+        {
+            abilityText.text = isCooldown ? Mathf.Ceil(currentCooldown).ToString() : "";
+        }
     }
 
-    // Update the position and rotation of the skillshot indicator
+    // Mermi nişangahı (3D Canvas üzerindeki image) pozisyon & rotasyon güncelle
     private void UpdateSkillshotIndicator()
     {
+        if (mainCamera == null) return;
+
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit))
         {
@@ -158,28 +204,41 @@ public class EzrealAbilityQ : MonoBehaviour
         }
     }
 
-    // Rotate the skillshot indicator to align with the aim direction
+    // Nişangahı aimPosition yönüne döndür
     private void UpdateIndicatorRotation()
     {
+        if (abilityCanvas == null) return;
+
         Quaternion targetRotation = Quaternion.LookRotation(aimPosition - transform.position);
         targetRotation.eulerAngles = new Vector3(0, targetRotation.eulerAngles.y, targetRotation.eulerAngles.z);
         abilityCanvas.transform.rotation = targetRotation;
     }
 
-    // Enable or disable the aiming mode UI elements
+    // Nişangah modunu aç/kapat
     private void EnableAimingMode(bool isEnabled)
     {
-        abilityCanvas.enabled = isEnabled;
-        skillshotIndicator.enabled = isEnabled;
+        if (abilityCanvas != null)
+            abilityCanvas.enabled = isEnabled;
+
+        if (skillshotIndicator != null)
+            skillshotIndicator.enabled = isEnabled;
+
         Cursor.visible = !isEnabled;
     }
 
-    // Initialize UI elements to their default state
+    // UI başlangıç ayarları
     private void InitializeUI()
     {
-        abilityCanvas.enabled = false;
-        skillshotIndicator.enabled = false;
-        if (abilityImageGreyed) abilityImageGreyed.color = Color.white;
-        abilityText.text = "";
+        if (abilityCanvas != null) 
+            abilityCanvas.enabled = false;
+
+        if (skillshotIndicator != null)
+            skillshotIndicator.enabled = false;
+
+        if (abilityImageGreyed != null)
+            abilityImageGreyed.color = Color.white;
+
+        if (abilityText != null)
+            abilityText.text = "";
     }
 }

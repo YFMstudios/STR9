@@ -1,72 +1,115 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Photon.Pun;
 
-public class ManaSystem : MonoBehaviour
+[RequireComponent(typeof(PhotonView))]
+public class ManaSystem : MonoBehaviourPun, IPunObservable
 {
-    public float maxMana = 100;         // Maksimum mana miktar�
-    public float startingMana = 100;    // Ba�lang��ta verilen mana miktar�
-    public float manaRegenRate = 5;     // Mana yenilenme h�z�
+    [Header("Mana Stats")]
+    public float maxMana = 100f;         // Maksimum mana
+    public float startingMana = 100f;    // Başlangıç manası
+    public float manaRegenRate = 5f;     // Saniyelik mana yenileme hızı
 
-    public Slider manaBar2d;            // 2D UI i�in mana �ubu�u
-    public Slider manaBar3d;            // 3D UI i�in mana �ubu�u
-    public Text manaText2d;             // 2D UI i�in mana metni
+    [Header("UI References")]
+    public Slider manaBar2d;     // 2D UI için mana çubuğu (yalnızca local)
+    public Slider manaBar3d;     // 3D UI için mana çubuğu (herkes görebilir)
+    public Text manaText2d;      // 2D UI için mana metni (yalnızca local)
 
-    private float currentMana;          // �u anki mana miktar�
+    private float currentMana;   // Şu anki mana
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        currentMana = startingMana;     // Ba�lang��ta mana miktar�n� ayarla
-        UpdateManaUI();                 // UI'y� g�ncelle
+        // Sadece local player “startingMana” ayarlayacak.
+        // Remote oyuncular OnPhotonSerializeView’den değer alacak.
+        if (photonView.IsMine)
+        {
+            currentMana = startingMana;
+        }
+
+        UpdateManaUI();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        RegenerateMana();               // Mana yenilenmesini sa�la
+        // Mana yenileme işlemini sadece local player yapar
+        if (photonView.IsMine)
+        {
+            RegenerateMana();
+        }
     }
 
-    // Mana yenilenmesini sa�layan fonksiyon
     private void RegenerateMana()
     {
         if (currentMana < maxMana)
         {
-            currentMana += manaRegenRate * Time.deltaTime;  // Zamanla mana miktar�n� artt�r
-            currentMana = Mathf.Clamp(currentMana, 0f, maxMana);  // Mana miktar�n� s�n�rla (0 ile maxMana aras�nda)
-            UpdateManaUI();                                 // UI'y� g�ncelle
+            currentMana += manaRegenRate * Time.deltaTime;
+            currentMana = Mathf.Clamp(currentMana, 0f, maxMana);
+            UpdateManaUI();
         }
     }
 
-    // UI'y� g�ncellemek i�in kullan�lan fonksiyon
-    public void UpdateManaUI()
-    {
-        if (manaBar2d != null)
-        {
-            manaBar2d.value = currentMana / maxMana;    // 2D mana �ubu�unu g�ncelle (oran olarak)
-        }
-        if (manaBar3d != null)
-        {
-            manaBar3d.value = currentMana / maxMana;    // 3D mana �ubu�unu g�ncelle (oran olarak)
-        }
-        if (manaText2d != null)
-        {
-            manaText2d.text = Mathf.RoundToInt(currentMana).ToString() + " / " + maxMana;  // 2D mana metnini g�ncelle
-        }
-    }
-
-    // Belirli bir yetene�i kullanma maliyetini kar��lay�p kar��layamayaca��n� kontrol eden fonksiyon
+    /// <summary>
+    /// Yetenek maliyetine yetecek mana var mı?
+    /// Bu kontrol de local player tarafından yapılır.
+    /// </summary>
     public bool CanAffordAbility(float abilityCost)
     {
-        return currentMana >= abilityCost;   // E�er �u anki mana yetenek maliyetini kar��l�yorsa true d�nd�r
+        return currentMana >= abilityCost;
     }
 
-    // Belirli bir yetene�i kullanma fonksiyonu
+    /// <summary>
+    /// Bir yetenek kullandığımızda local player mana düşürüyor.
+    /// </summary>
     public void UseAbility(float abilityCost)
     {
-        currentMana -= abilityCost;             // Yetenek maliyetini d��
-        currentMana = Mathf.Clamp(currentMana, 0f, maxMana);  // Mana miktar�n� s�n�rla (0 ile maxMana aras�nda)
-        UpdateManaUI();                         // UI'y� g�ncelle
+        if (!photonView.IsMine) return; // Sadece local karakter mana harcar
+
+        currentMana -= abilityCost;
+        currentMana = Mathf.Clamp(currentMana, 0f, maxMana);
+
+        UpdateManaUI();
+    }
+
+    /// <summary>
+    /// 2D/3D mana barlarını günceller.
+    /// 2D bar sadece local player için, 3D bar ise herkes için.
+    /// </summary>
+    private void UpdateManaUI()
+    {
+        // 3D bar (herkes görsün)
+        if (manaBar3d != null)
+        {
+            manaBar3d.value = currentMana / maxMana;
+        }
+
+        // Sadece local player ise 2D barı güncelle
+        if (photonView.IsMine && gameObject.CompareTag("Player"))
+        {
+            if (manaBar2d != null)
+            {
+                manaBar2d.value = currentMana / maxMana;
+            }
+            if (manaText2d != null)
+            {
+                manaText2d.text = Mathf.RoundToInt(currentMana) + " / " + maxMana;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Photon'un serialize metodu: Her karede veri senkronu yaparız.
+    /// Local player “currentMana” bilgisini yazar, remote oyuncular okur.
+    /// </summary>
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting) // Eğer local player isek, manamızı gönderiyoruz
+        {
+            stream.SendNext(currentMana);
+        }
+        else // Remote player isek, mana değerini alıyoruz
+        {
+            currentMana = (float)stream.ReceiveNext();
+            UpdateManaUI();
+        }
     }
 }

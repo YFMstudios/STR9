@@ -1,34 +1,36 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+// Photon eklemeleri
+using Photon.Pun;
 
-// This script requires Movement and ManaSystem components to function.
 [RequireComponent(typeof(Movement))]
 [RequireComponent(typeof(ManaSystem))]
-public class WukongAbilityW : MonoBehaviour
+[RequireComponent(typeof(PhotonView))]
+public class WukongAbilityW : MonoBehaviourPun
 {
     [Header("Ability Values")]
-    public KeyCode abilityKey = KeyCode.W; // The key to activate the ability.
-    public float cooldown = 18f; // Time in seconds before the ability can be used again.
-    public float manaCost = 40f; // The mana cost to use the ability.
-    public float invisibilityDuration = 1.5f; // How long the invisibility effect lasts.
+    public KeyCode abilityKey = KeyCode.W;  // Yetenek tuşu
+    public float cooldown = 18f;           // Cooldown süresi
+    public float manaCost = 40f;          // Mana maliyeti
+    public float invisibilityDuration = 1.5f; // Görünmezlik süresi
 
-    public GameObject clonePrefab; // Prefab for the clone that will be spawned.
+    public GameObject clonePrefab;        // Klon prefab'ı
 
     [Header("Material")]
-    public Material originalMaterial; // The original material of the player.
-    public Material transparentMaterial; // The material used to make the player invisible.
+    public Material originalMaterial;     // Karakterin orijinal malzemesi
+    public Material transparentMaterial;  // Görünmezlik malzemesi
 
     [Header("UI Elements")]
-    public Image abilityImageMain; // Main UI element for the ability.
-    public Image abilityImageGreyed; // UI element shown when the ability is on cooldown.
-    public Text abilityText; // Text displaying the cooldown.
-    public Image screenDarkeningOverlay; // Overlay to darken the screen when ability is active.
+    public Image abilityImageMain;
+    public Image abilityImageGreyed;
+    public Text abilityText;
+    public Image screenDarkeningOverlay;
 
-    private ManaSystem manaSystem; // Reference to the ManaSystem component.
-    private bool isCooldown = false; // Tracks whether the ability is on cooldown.
-    private float currentCooldown; // The current cooldown time remaining.
-    private Renderer[] renderers; // Array of renderers for changing materials.
+    private ManaSystem manaSystem;
+    private bool isCooldown = false;
+    private float currentCooldown;
+    private Renderer[] renderers;     // Çocuğundaki rendererları toplayacağız
 
     void Awake()
     {
@@ -39,106 +41,164 @@ public class WukongAbilityW : MonoBehaviour
 
     void Update()
     {
+        // Sadece local (sahibi olduğumuz) karakterin input'unu dinleriz
+        if (!photonView.IsMine) 
+        {
+            return;
+        }
+
         HandleInput();
         UpdateCooldown();
         UpdateUI();
     }
 
-    // Caches renderers in child objects for efficient material changes.
+    // Çocuk objelerdeki Renderer'ları toplayarak malzeme değiştirme işini kolaylaştırır
     private void CacheRenderers()
     {
         renderers = GetComponentsInChildren<Renderer>();
     }
 
-    // Checks for player input to activate the ability.
     private void HandleInput()
     {
+        // Yetenek tuşuna basıldıysa, cooldown yoksa ve mana yetiyorsa
         if (Input.GetKeyDown(abilityKey) && !isCooldown && manaSystem.CanAffordAbility(manaCost))
         {
             ActivateAbility();
         }
     }
 
-    // Activates the ability, managing mana cost, cooldown, and effects.
+    // Yetenek aktif olduğunda, mana düşürme + cooldown + RPC ile görünmezlik + klon oluşturma
     private void ActivateAbility()
     {
+        // 1) Mana harca
         manaSystem.UseAbility(manaCost);
+
+        // 2) Cooldown başlat (sadece localde)
         StartCooldown();
-        StartCoroutine(BecomeInvisible(invisibilityDuration));
-        SpawnClone();
+
+        // 3) Klonu ağ üzerinde herkesin görmesi için Instantiate ediyoruz
+        if (clonePrefab)
+        {
+            // PhotonNetwork.Instantiate: Tüm istemcilerde aynı klon oluşturulur
+            PhotonNetwork.Instantiate(clonePrefab.name, transform.position, transform.rotation);
+        }
+
+        // 4) Karakteri ileri doğru hafif itme (Dash)
+        //    Eğer Movement script’iniz transform'u PhotonTransformView ile senkronluyorsa,
+        //    sadece localde konumu değiştirmeniz yeterli. Diğer istemciler bu değişikliği görecektir.
         PushPlayerForward();
+
+        // 5) Herkeste görünmezlik efektini tetiklemek istiyorsak, RPC ile malzeme değişimini duyuruyoruz
+        photonView.RPC("RPC_BecomeInvisible", RpcTarget.All, invisibilityDuration);
+
+        // (Eğer "ekran karartması" efektini sadece local oyuncu görecekse, burada açabilirsiniz)
+        if (screenDarkeningOverlay != null)
+        {
+            screenDarkeningOverlay.enabled = true; 
+        }
     }
 
-    // Simulates a dash or leap by moving the player forward.
     private void PushPlayerForward()
     {
         float pushDistance = 1.0f;
+        // Sadece local karakterin konumunu değiştiriyoruz
         transform.position += transform.forward * pushDistance;
     }
 
-    // Makes the player invisible for a specified duration.
-    private IEnumerator BecomeInvisible(float duration)
+    // RPC methodu: Tüm istemcilerde bu obje üzerinde çalışacak; malzemeyi görünmez yapacak, sonra geri alacak
+    [PunRPC]
+    private void RPC_BecomeInvisible(float duration)
     {
-        screenDarkeningOverlay.enabled = true;
+        // Bu karakterin render materyalini görünmez yap
         SetMaterials(transparentMaterial);
-        yield return new WaitForSeconds(duration);
-        SetMaterials(originalMaterial);
-        screenDarkeningOverlay.enabled = false;
+
+        // Her istemcide coroutine başlatıp süre sonunda eski haline dönüyoruz
+        StartCoroutine(RevertInvisibility(duration));
     }
 
-    // Changes the material of all child renderers to simulate invisibility.
+    private IEnumerator RevertInvisibility(float duration)
+    {
+        // Belirli süre bekliyoruz
+        yield return new WaitForSeconds(duration);
+
+        // Materyali orijinal haline çevir
+        SetMaterials(originalMaterial);
+
+        // Sadece local oyuncu da ekran karartması kapanır
+        if (photonView.IsMine && screenDarkeningOverlay != null)
+        {
+            screenDarkeningOverlay.enabled = false;
+        }
+    }
+
+    // Tüm Renderer'ların materyalini değiştirir
     private void SetMaterials(Material material)
     {
-        foreach (var renderer in renderers)
+        foreach (var rend in renderers)
         {
-            renderer.material = material;
+            rend.material = material;
         }
     }
 
-    // Spawns a clone at the player's current position.
-    private void SpawnClone()
-    {
-        if (clonePrefab)
-        {
-            Instantiate(clonePrefab, transform.position, transform.rotation);
-        }
-    }
-
-    // Initiates the cooldown period, preventing immediate reuse of the ability.
+    // Cooldown başlatmak
     private void StartCooldown()
     {
         isCooldown = true;
         currentCooldown = cooldown;
-        UpdateUI();
     }
 
-    // Manages the cooldown timer and updates the UI accordingly.
+    // Cooldown sayacını düşürmek
     private void UpdateCooldown()
     {
-        if (isCooldown)
+        if (!isCooldown) return;
+
+        currentCooldown -= Time.deltaTime;
+        if (currentCooldown <= 0f)
         {
-            currentCooldown -= Time.deltaTime;
-            isCooldown = currentCooldown > 0;
-            UpdateUI();
+            currentCooldown = 0f;
+            isCooldown = false;
         }
     }
 
-    // Updates the UI elements based on the ability's availability and cooldown.
+    // UI Güncellemesi (sadece local player için)
     private void UpdateUI()
     {
-        if (abilityImageGreyed)
+        // 2D UI veya benzeri unsurlar genellikle sadece localde gösterilir
+        if (!photonView.IsMine)
+        {
+            return;
+        }
+
+        if (abilityImageGreyed != null)
         {
             abilityImageGreyed.color = isCooldown ? Color.grey : Color.white;
             abilityImageGreyed.fillAmount = isCooldown ? currentCooldown / cooldown : 0;
+        }
+        if (abilityImageMain != null)
+        {
             abilityImageMain.color = manaSystem.CanAffordAbility(manaCost) ? Color.white : Color.red;
         }
-        abilityText.text = isCooldown ? Mathf.Ceil(currentCooldown).ToString() : "";
+
+        if (abilityText != null)
+        {
+            abilityText.text = isCooldown ? Mathf.Ceil(currentCooldown).ToString() : "";
+        }
     }
 
-    // Initializes UI elements to their default state.
+    // UI başlangıç durumunu ayarlar
     private void InitializeUI()
     {
-        if (abilityImageGreyed) abilityImageGreyed.color = Color.white;
-        abilityText.text = "";
+        if (abilityImageGreyed != null)
+        {
+            abilityImageGreyed.color = Color.white;
+        }
+        if (abilityText != null)
+        {
+            abilityText.text = "";
+        }
+        if (screenDarkeningOverlay != null)
+        {
+            screenDarkeningOverlay.enabled = false;
+        }
     }
 }

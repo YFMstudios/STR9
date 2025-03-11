@@ -50,9 +50,9 @@ GameObject:
   - component: {fileID: -3851584816898897345}
   - component: {fileID: 7627656331015363098}
   - component: {fileID: -8326526324587816037}
-  - component: {fileID: 4176526752585043007}
-  - component: {fileID: 1362126884722342043}
-  - component: {fileID: 3567966727767794476}
+  - component: {fileID: 8492078489007081830}
+  - component: {fileID: 4578256138742256997}
+  - component: {fileID: 3937197946125057989}
   m_Layer: 0
   m_Name: RangedMinion
   m_TagString: AllyMinion
@@ -285,7 +285,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healthSlider3D: {fileID: 8486253604153119188}
---- !u!114 &4176526752585043007
+--- !u!114 &8492078489007081830
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -304,12 +304,12 @@ MonoBehaviour:
   OwnershipTransfer: 1
   observableSearch: 2
   ObservedComponents:
-  - {fileID: 1362126884722342043}
-  - {fileID: 3567966727767794476}
+  - {fileID: 4578256138742256997}
+  - {fileID: 3937197946125057989}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &1362126884722342043
+--- !u!114 &4578256138742256997
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -325,7 +325,7 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 0
---- !u!114 &3567966727767794476
+--- !u!114 &3937197946125057989
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

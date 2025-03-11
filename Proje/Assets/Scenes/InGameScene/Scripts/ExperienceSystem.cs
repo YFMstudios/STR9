@@ -1,68 +1,116 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Photon.Pun;
 
-public class ExperienceSystem : MonoBehaviour
+[RequireComponent(typeof(PhotonView))]
+public class ExperienceSystem : MonoBehaviourPun, IPunObservable
 {
-    public int currentLevel = 1;        // Mevcut seviye
-    public int currentExp = 0;          // Mevcut deneyim puan�
-    public int expToLevelUp = 100;      // Seviye atlamak i�in gereken toplam deneyim puan�
-    public int expIncreaseFactor = 2;   // Seviye atlay�nca deneyim puan� gereksiniminin art�� fakt�r�
+    [Header("Experience Stats")]
+    public int currentLevel = 1;
+    public int currentExp = 0;
+    public int expToLevelUp = 100;
+    public int expIncreaseFactor = 2;
 
-    public Slider expBarSlider;         // Deneyim �ubu�u UI eleman�
-    public Text levelText2D;            // 2 boyutlu seviye metni UI eleman�
-    public Text levelText3D;            // 3 boyutlu seviye metni UI eleman�
+    [Header("UI References")]
+    public Slider expBarSlider;  // Deneyim çubuğu (3D veya 2D olabilir)
+    public Text levelText2D;     // 2D seviye metni (yalnızca local)
+    public Text levelText3D;     // 3D seviye metni (herkes görsün)
 
-    // Her g�ncelleme �er�evesinde UI'yi g�nceller
     void Update()
     {
+        // Her çerçevede UI güncellemesi yapalım (veriler OnPhotonSerializeView ile senkron oluyor)
         UpdateUI();
     }
 
-    // D��mandan kazan�lan deneyim puan� miktar�n� al�r ve deneyim kazanma i�levini �a��r�r
-    private void GainExperienceFromEnemy(int amount)
+    /// <summary>
+    /// Düşmanı yenince, istediğimiz XP miktarını kazandırır.
+    /// </summary>
+    public void GainExperienceFromEnemy(int amount)
     {
+        // Sadece kendi karakterimiz isek, local xp artırma işlemini başlatırız
+        if (!photonView.IsMine) 
+            return;
+
+        // Tüm istemcilerde XP güncellensin diye RPC iletmeyi tercih edebilirsiniz. 
+        // Veya sadece localde XP’yi arttırıp OnPhotonSerializeView ile senkron da edebilirsiniz.
+        // Burada örnek olarak direkt localde arttırıp, OnPhotonSerializeView ile paylaşacağız:
         GainExperience(amount);
     }
 
-    // Deneyim kazanma i�levi
+    /// <summary>
+    /// Asıl XP arttırma mantığı (local).
+    /// </summary>
     private void GainExperience(int amount)
     {
-        currentExp += amount;   // Deneyim puan�n� art�r
+        currentExp += amount;
 
-        // E�er mevcut deneyim puan� seviye atlamak i�in gereken deneyim puan�n� ge�erse
+        // Seviye atlama kontrolü
         while (currentExp >= expToLevelUp)
         {
-            LevelUp();   // Seviye atla i�levini �a��r
+            LevelUp();
         }
+        // UpdateUI();  // Local UI anında güncellenir, 
+        // ancak OnPhotonSerializeView ile 3D kopyalar da senkron olacak.
     }
 
-    // Seviye atlama i�levi
+    /// <summary>
+    /// Seviye atlama mantığı
+    /// </summary>
     private void LevelUp()
     {
-        currentLevel++;          // Seviyeyi art�r
-        currentExp -= expToLevelUp;   // Mevcut deneyim puan�ndan seviye atlamak i�in gereken puan� ��kar
-        expToLevelUp *= expIncreaseFactor;   // Bir sonraki seviye i�in gereken deneyim puan�n� art�r
+        currentLevel++;
+        currentExp -= expToLevelUp;
+        expToLevelUp *= expIncreaseFactor;
     }
 
-    // UI elemanlar�n� g�ncelleyen i�lev
+    /// <summary>
+    /// Her çerçevede slider ve seviye metnini günceller.
+    /// (currentExp, currentLevel vb. OnPhotonSerializeView ile senkronize edilir.)
+    /// </summary>
     private void UpdateUI()
     {
+        // Experience Bar
         if (expBarSlider != null)
         {
-            expBarSlider.maxValue = expToLevelUp;   // Deneyim �ubu�unun maksimum de�erini g�ncelle
-            expBarSlider.value = currentExp;        // Deneyim �ubu�unun mevcut de�erini g�ncelle
+            expBarSlider.maxValue = expToLevelUp;
+            expBarSlider.value = currentExp;
         }
 
-        if (levelText2D != null)
+        // 2D Level text (yalnızca local player)
+        if (levelText2D != null && photonView.IsMine)
         {
-            levelText2D.text = currentLevel.ToString();   // 2 boyutlu seviye metnini g�ncelle
+            levelText2D.text = currentLevel.ToString();
         }
 
+        // 3D Level text (herkes görebilir)
+        // Eğer sadece local oyuncu üzerinde 3D text görmek istiyorsanız, 
+        // burada da photonView.IsMine kontrolü yapabilirsiniz.
         if (levelText3D != null)
         {
-            levelText3D.text = currentLevel.ToString();   // 3 boyutlu seviye metnini g�ncelle
+            levelText3D.text = currentLevel.ToString();
+        }
+    }
+
+    /// <summary>
+    /// OnPhotonSerializeView ile currentExp, currentLevel, expToLevelUp değerlerini 
+    /// ağ üzerinde senkronize ediyoruz.
+    /// Local player yazıyor (IsWriting), diğerleri okuyor (IsReading).
+    /// </summary>
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting) 
+        {
+            // Local player verileri gönderir
+            stream.SendNext(currentLevel);
+            stream.SendNext(currentExp);
+            stream.SendNext(expToLevelUp);
+        }
+        else
+        {
+            // Remote player verileri alır
+            currentLevel = (int)stream.ReceiveNext();
+            currentExp = (int)stream.ReceiveNext();
+            expToLevelUp = (int)stream.ReceiveNext();
         }
     }
 }

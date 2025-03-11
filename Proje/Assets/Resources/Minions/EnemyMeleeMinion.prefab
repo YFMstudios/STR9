@@ -21,9 +21,9 @@ GameObject:
   - component: {fileID: -8326526324587816037}
   - component: {fileID: 8703567752238126359}
   - component: {fileID: -5627431794341789071}
-  - component: {fileID: 7758653669385572201}
-  - component: {fileID: -6648261889248016549}
-  - component: {fileID: -567836056981676394}
+  - component: {fileID: -7170744042895488584}
+  - component: {fileID: 1517322131824869183}
+  - component: {fileID: -6900666765955255917}
   m_Layer: 7
   m_Name: EnemyMeleeMinion
   m_TagString: EnemyMinion
@@ -308,7 +308,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29ea8339f3c87c249abaaa0967ffa43f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &7758653669385572201
+--- !u!114 &-7170744042895488584
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -327,12 +327,12 @@ MonoBehaviour:
   OwnershipTransfer: 1
   observableSearch: 2
   ObservedComponents:
-  - {fileID: -6648261889248016549}
-  - {fileID: -567836056981676394}
+  - {fileID: 1517322131824869183}
+  - {fileID: -6900666765955255917}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &-6648261889248016549
+--- !u!114 &1517322131824869183
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -348,7 +348,7 @@ MonoBehaviour:
   m_SynchronizeRotation: 1
   m_SynchronizeScale: 0
   m_UseLocal: 0
---- !u!114 &-567836056981676394
+--- !u!114 &-6900666765955255917
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

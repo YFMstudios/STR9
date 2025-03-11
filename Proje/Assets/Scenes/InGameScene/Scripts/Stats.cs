@@ -1,10 +1,12 @@
 using System.Collections;
 using UnityEngine;
+using Photon.Pun; // Photon PUN eklentisi
 
-public class Stats : MonoBehaviour
+[RequireComponent(typeof(PhotonView))]
+public class Stats : MonoBehaviourPun
 {
     [Header("Base Stats")]
-    public float health;            // Can değeri
+    public float health;            // Max Can değeri
     public float damage;            // Verilen hasar miktarı
     public float attackSpeed;       // Saldırı hızı
 
@@ -18,43 +20,84 @@ public class Stats : MonoBehaviour
 
     private void Awake()
     {
-        healthUI = GetComponent<HealthUI>();  // HealthUI bileşenini alır
-        currentHealth = health;               // Mevcut canı başlatır
-        targetHealth = health;                // Hedef canı başlatır
+        healthUI = GetComponent<HealthUI>();
 
-        healthUI.start3DSlider(health);       // 3D slider'ı başlatır
-        healthUI.Update2DSlider(health, currentHealth);  // 2D slider'ı günceller
+        currentHealth = health;
+        targetHealth = health;
+
+        if (healthUI != null)
+        {
+            healthUI.start3DSlider(health);
+            healthUI.Update2DSlider(health, currentHealth);
+        }
     }
 
-    // Hasar alma işlemi
+    /// <summary>
+    /// (1) Tek parametreli TakeDamage: Sadece hasar miktarını alır.
+    /// Harici bir script, "targetStats.TakeDamage(50f);" gibi çağırabilir.
+    /// </summary>
+    public void TakeDamage(float damageAmount)
+    {
+        // Eğer bu objenin photonView’ı bize ait değilse (IsMine == false)
+        // yine de RPC ile hasarı herkesin görmesini sağlıyoruz.
+        if (!photonView.IsMine)
+        {
+            // Tasarıma göre bir şey yapmak isteyebilirsiniz.
+            // Ama en basitinde yine RPC yollayabiliriz. 
+        }
+
+        // Tüm istemcilerde "RPC_ApplyDamage" metodunu çağırıyoruz.
+        photonView.RPC("RPC_ApplyDamage", RpcTarget.All, damageAmount);
+    }
+
+    /// <summary>
+    /// (2) İki parametreli TakeDamage: Kaynak (source) + Hasar miktarı.
+    /// Bu, Trap veya Projectile vb. yerlerden "TakeDamage(gameObject, 50f);" şeklinde çağrıldığında
+    /// Compile hatası almamanızı sağlar. Şu anda “source” parametresini sadece görmezden geliyoruz.
+    /// </summary>
     public void TakeDamage(GameObject source, float damageAmount)
     {
-        targetHealth -= damageAmount;  // Hedef canı hasar miktarı kadar azaltır
+        // İsterseniz source parametresini de RPC'ye ekleyip
+        // "RPC_ApplyDamageWithSource" gibi bir metot yazabilirsiniz.
+        // Şimdilik sadece hasar miktarını yolluyoruz:
+        photonView.RPC("RPC_ApplyDamage", RpcTarget.All, damageAmount);
+    }
 
-        if (targetHealth <= 0)  // Can sıfıra ulaşırsa
+    /// <summary>
+    /// Asıl HP düşürme ve ölüm kontrolü bu RPC içinde yapılır;
+    /// böylece tüm istemcilerde aynı sonuç oluşur.
+    /// </summary>
+    [PunRPC]
+    private void RPC_ApplyDamage(float damageAmount)
+    {
+        targetHealth -= damageAmount;
+
+        // Hedef sağlık sıfır veya altına düştü mü?
+        if (targetHealth <= 0)
         {
             targetHealth = 0;
 
-            if (gameObject.CompareTag("Player"))
+            // Player mı, Enemy mi kontrolü yapalım
+            if (CompareTag("Player"))
             {
-                CheckIfPlayerDead();  // Oyuncu ölümü kontrolü
+                CheckIfPlayerDead();
             }
-            else if (gameObject.CompareTag("Enemy") || gameObject.CompareTag("EnemyMinion") || gameObject.CompareTag("EnemyTurret"))
+            else if (CompareTag("Enemy") || CompareTag("EnemyMinion") || CompareTag("EnemyTurret"))
             {
-                // Düşman veya turret öldüğünde
                 var enemyDeathHandler = GetComponent<EnemyDeathHandler>();
                 if (enemyDeathHandler != null)
                 {
-                    enemyDeathHandler.Die();  // Ölüm işlemi düşman yönetim scriptinde yapılır
+                    enemyDeathHandler.Die();
                 }
                 else
                 {
-                    Destroy(gameObject);  // Eğer EnemyDeathHandler yoksa direkt düşmanı veya turret'i yok et
+                    // Photon ile yok etmek
+                    PhotonNetwork.Destroy(gameObject);
                 }
             }
         }
 
-        // Hasar geçiş Coroutine'u başlatır
+        // Zaten bir damageCoroutine çalışmıyorsa başlat
         if (damageCoroutine == null)
         {
             damageCoroutine = StartCoroutine(LerpHealth());
@@ -64,9 +107,16 @@ public class Stats : MonoBehaviour
     // Oyuncunun öldüğünü kontrol eden fonksiyon
     private void CheckIfPlayerDead()
     {
-        Debug.Log($"{gameObject.name} öldü!");  // Ölüm mesajı
-        healthUI.Update2DSlider(health, 0);     // Canı sıfıra ayarlar
-        Destroy(gameObject);  // Oyuncuyu yok eder
+        Debug.Log($"{gameObject.name} öldü!");
+
+        if (healthUI != null)
+        {
+            // UI'yi sıfırla
+            healthUI.Update2DSlider(health, 0);
+        }
+
+        // Photon ile yok edelim (tüm istemcilerde silinsin)
+        PhotonNetwork.Destroy(gameObject);
     }
 
     // Hasar geçişini yapan Coroutine
@@ -76,24 +126,25 @@ public class Stats : MonoBehaviour
         float initialHealth = currentHealth;
         float target = targetHealth;
 
-        // Belirlenen sürede hasar geçişini yapar
         while (elapsedTime < damageLerpDuration)
         {
-            currentHealth = Mathf.Lerp(initialHealth, target, elapsedTime / damageLerpDuration);  // Can geçişini yapar
-            UpdateHealthUI();   // UI'yi günceller
+            currentHealth = Mathf.Lerp(initialHealth, target, elapsedTime / damageLerpDuration);
+            UpdateHealthUI();
             elapsedTime += Time.deltaTime;
-            yield return null;  // Sonraki frame'i bekler
+            yield return null;
         }
 
-        currentHealth = target;  // Canı hedefe ayarlar
-        UpdateHealthUI();        // UI'yi günceller
-        damageCoroutine = null;  // Coroutine'u sıfırlar
+        currentHealth = target;
+        UpdateHealthUI();
+        damageCoroutine = null;
     }
 
     // UI güncelleme işlemi
     private void UpdateHealthUI()
     {
-        healthUI.Update2DSlider(health, currentHealth);  // 2D slider'ı günceller
-        healthUI.update3DSlider(currentHealth);          // 3D slider'ı günceller
+        if (healthUI == null) return;
+
+        healthUI.Update2DSlider(health, currentHealth);
+        healthUI.update3DSlider(currentHealth);
     }
 }

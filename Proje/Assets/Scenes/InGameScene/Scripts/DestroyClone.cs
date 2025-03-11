@@ -1,13 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
-public class DestroyClone : MonoBehaviour
+[RequireComponent(typeof(PhotonView))]
+public class DestroyClone : MonoBehaviourPun
 {
-    public float delay = 5f; // Time in seconds after which the GameObject will be destroyed
+    public float delay = 5f;
 
     void Start()
     {
-        Destroy(gameObject, delay);
+        if (photonView.IsMine)
+        {
+            // Sadece sahibi olan istemci 5 saniye sonra yok etmeyi tetikliyor.
+            // Tüm istemcilerde yok etmek için PhotonNetwork.Destroy():
+            StartCoroutine(DestroyForAll());
+        }
+    }
+
+    private IEnumerator DestroyForAll()
+    {
+        yield return new WaitForSeconds(delay);
+        PhotonNetwork.Destroy(gameObject); // Herkeste siler
     }
 }
+
