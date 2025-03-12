@@ -1,12 +1,12 @@
-using Photon.Pun;
 using UnityEngine;
 
-public class MinionRangedProjectile : MonoBehaviourPunCallbacks
+public class MinionRangedProjectile : MonoBehaviour
 {
-    private GameObject target; 
-    private float damage;
-    public float speed = 10f;
+    private GameObject target; // Hedef nesnesi
+    private float damage;      // Zarar miktarý
+    public float speed = 10f;  // Hýz
 
+    // Hedef ve saldýrý hasarý ayarlamak için kullanýlýr
     public void SetTarget(GameObject newTarget, float attackDamage)
     {
         target = newTarget;
@@ -17,46 +17,35 @@ public class MinionRangedProjectile : MonoBehaviourPunCallbacks
     {
         if (target == null)
         {
-            // Sadece MasterClient, aÄŸ Ã¼zerinden destroy edebilir
-            if (PhotonNetwork.IsMasterClient)
-            {
-                PhotonNetwork.Destroy(gameObject);
-            }
+            Destroy(gameObject); // Hedef yoksa projeyi yok et ve fonksiyondan çýk
             return;
         }
 
-        MoveTowardsTarget(); 
+        MoveTowardsTarget(); // Hedefe doðru hareket et
     }
 
     private void MoveTowardsTarget()
     {
-        Vector3 direction = target.transform.position - transform.position;
-        float distanceThisFrame = speed * Time.deltaTime;
+        Vector3 direction = target.transform.position - transform.position; // Hedefe doðru vektör
+        float distanceThisFrame = speed * Time.deltaTime; // Bu frame'deki hareket mesafesi
 
-        if (direction.magnitude <= distanceThisFrame)
+        if (direction.magnitude <= distanceThisFrame) // Hedefe ulaþýldýysa
         {
-            DamageTarget();
-            if (PhotonNetwork.IsMasterClient)
-            {
-                PhotonNetwork.Destroy(gameObject);
-            }
+            DamageTarget(); // Hedefe zarar ver
+            Destroy(gameObject); // Projeyi yok et
         }
         else
         {
-            transform.Translate(direction.normalized * distanceThisFrame, Space.World);
+            transform.Translate(direction.normalized * distanceThisFrame, Space.World); // Hedefe doðru hareket et
         }
     }
 
     private void DamageTarget()
     {
-        // YalnÄ±zca MasterClient gerÃ§ek hasarÄ± uygulasÄ±n
-        if (PhotonNetwork.IsMasterClient)
+        ObjectiveStats targetStats = target.GetComponent<ObjectiveStats>(); // Hedefin istatistikler bileþeni
+        if (targetStats != null)
         {
-            var targetStats = target.GetComponent<ObjectiveStats>();
-            if (targetStats != null)
-            {
-                targetStats.TakeDamage(damage);
-            }
+            targetStats.TakeDamage(damage); // Hedefe zarar ver
         }
     }
 }

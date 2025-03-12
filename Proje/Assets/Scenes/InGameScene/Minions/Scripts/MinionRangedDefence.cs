@@ -1,81 +1,66 @@
-using Photon.Pun;
 using UnityEngine;
 
-public class MinionRangedDefence : MonoBehaviourPunCallbacks
+public class MinionRangedDefence : MonoBehaviour
 {
-    [Header("Projectile Settings (Koddan Belirliyoruz)")]
-    // Burada enemy menzilli minyonun mermisini referanslıyoruz:
-    private const string ENEMY_PROJECTILE_PATH = "Projectiles/EnemyRangedMinionProjectile";
+    public GameObject projectilePrefab;       // Projectile prefab (ateslenecek mermi)
+    public Transform projectileSpawnPoint;    // Mermi spawn noktası
+    public float attackCooldown = 2.0f;       // Saldiri araligi (cooldown)
 
-    public Transform projectileSpawnPoint;    
-    public float attackCooldown = 2.0f;       
+    private float attackRange;                 // Saldiri menzili
+    private float attackDamage;                // Saldiri hasari
+    private float lastAttackTime;              // Son saldiri zamani
 
-    private float attackRange;
-    private float attackDamage;
-    private float lastAttackTime;
-
-    private ObjectiveStats stats;
-    private MinionAIDefence minionAI;
+    private ObjectiveStats stats;              // Obje uzerindeki istatistikler bileşeni
+    private MinionAIDefence minionAI;         // Minion hareket ve hedef yönetimi bileşeni
 
     private void Start()
     {
+        // Bilesen referanslarini al
         stats = GetComponent<ObjectiveStats>();
         minionAI = GetComponent<MinionAIDefence>();
 
-        // Örnek: hasarı %50'si olsun
-        attackRange = minionAI.stopDistance + 0.5f;
-        attackDamage = stats.damage * 0.5f;  
+        // Saldiri menzilini ve hasarini ayarla
+        attackRange = minionAI.stopDistance + 0.5f; // Saldiri menzili
+        attackDamage = stats.damage * 0.5f;         // Saldiri hasari
     }
 
     private void Update()
     {
-        // Yalnızca Master Client saldırı
-        if (!PhotonNetwork.IsMasterClient)
-        {
-            return;
-        }
-
+        // Saldiri cooldown süresi kontrolü
         if (Time.time >= lastAttackTime + attackCooldown && IsTargetInRange())
         {
-            Attack();
+            Attack(); // Saldiri gerceklestir
         }
         else if (!IsTargetInRange())
         {
-            minionAI.StopCombat();
+            minionAI.StopCombat(); // Hedefte degilse savasi durdur
         }
     }
 
     private bool IsTargetInRange()
     {
-        return minionAI.currentTarget != null &&
-               Vector3.Distance(transform.position, minionAI.currentTarget.position) <= attackRange;
+        // Hedefin mevcut olup olmadigini ve hedefin saldiri menzilinde olup olmadigini kontrol et
+        return minionAI.currentTarget != null && Vector3.Distance(transform.position, minionAI.currentTarget.position) <= attackRange;
     }
 
     private void Attack()
     {
-        if (!PhotonNetwork.IsMasterClient) return;
-
+        // Eger son saldiri dan sonra cooldown süresi dolmus ise
         if (Time.time >= lastAttackTime + attackCooldown)
         {
-            lastAttackTime = Time.time;
-            minionAI.StartCombat();
+            lastAttackTime = Time.time; // Son saldiri zamanini güncelle
+            minionAI.StartCombat(); // Minion savasi baslatir
 
-            // Mermiyi ağ üzerinden oluştur
-            GameObject projectile = PhotonNetwork.Instantiate(
-                ENEMY_PROJECTILE_PATH,
-                projectileSpawnPoint.position,
-                Quaternion.identity
-            );
-
-            // Mermi script'ine hedef ve hasarı ilet
+            // ProjectilePrefab'ten yeni bir mermi (projectile) olustur
+            GameObject projectile = Instantiate(projectilePrefab, projectileSpawnPoint.position, Quaternion.identity);
             MinionRangedProjectile projectileScript = projectile.GetComponent<MinionRangedProjectile>();
-            projectileScript.SetTarget(minionAI.currentTarget.gameObject, attackDamage);
+            projectileScript.SetTarget(minionAI.currentTarget.gameObject, attackDamage); // Mermiye hedef ve saldiri hasari ata
 
-            // Örneğin hedef "Player" ise anında hasar verebilirsiniz (isteğe bağlı):
+            // Eger hedef oyuncuysa hasar verme islemi
             if (minionAI.currentTarget.CompareTag("Player"))
             {
                 Stats playerStats = minionAI.currentTarget.GetComponent<Stats>();
-                playerStats?.TakeDamage(gameObject, attackDamage);
+                playerStats?.TakeDamage(gameObject, attackDamage); // Null check ile hasar verir
             }
         }
     }

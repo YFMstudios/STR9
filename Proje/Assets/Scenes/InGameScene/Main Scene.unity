@@ -896,7 +896,7 @@ Transform:
   m_GameObject: {fileID: 582582045}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 52.67, y: -36.47778, z: 68.51}
+  m_LocalPosition: {x: 59.335, y: -36.47778, z: 70.15182}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1129,12 +1129,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4541624740231659275, guid: bf34751bdd4662d4bb185ea79102f6b0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1560304135}
-    - targetCorrespondingSourceObject: {fileID: 4541624740231659275, guid: bf34751bdd4662d4bb185ea79102f6b0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1560304138}
-    - targetCorrespondingSourceObject: {fileID: 4541624740231659275, guid: bf34751bdd4662d4bb185ea79102f6b0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1560304137}
   m_SourcePrefab: {fileID: 100100000, guid: bf34751bdd4662d4bb185ea79102f6b0, type: 3}
 --- !u!1 &653136388
 GameObject:
@@ -1312,7 +1306,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4709528127833354, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -43.01
+      value: -42.88
       objectReference: {fileID: 0}
     - target: {fileID: 4709528127833354, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1320,7 +1314,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4709528127833354, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 2.94
+      value: 3.07
       objectReference: {fileID: 0}
     - target: {fileID: 4709528127833354, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1361,12 +1355,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1411054063627100, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1762557801}
-    - targetCorrespondingSourceObject: {fileID: 1411054063627100, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1762557803}
-    - targetCorrespondingSourceObject: {fileID: 1411054063627100, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1762557802}
   m_SourcePrefab: {fileID: 100100000, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
 --- !u!4 &722280474 stripped
 Transform:
@@ -1797,12 +1785,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1411054063627100, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1491958017}
-    - targetCorrespondingSourceObject: {fileID: 1411054063627100, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1491958019}
-    - targetCorrespondingSourceObject: {fileID: 1411054063627100, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1491958018}
   m_SourcePrefab: {fileID: 100100000, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
 --- !u!4 &955324255 stripped
 Transform:
@@ -2092,10 +2074,6 @@ PrefabInstance:
     - target: {fileID: 1411054063627100, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
       propertyPath: m_Name
       value: 'Trap3 '
-      objectReference: {fileID: 0}
-    - target: {fileID: 1411054063627100, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1411054063627100, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
       propertyPath: m_TagString
@@ -2744,6 +2722,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meleeMinionMoveSpeed: 3
   rangedMinionMoveSpeed: 3
+  meleeMinionPrefab: {fileID: 2379972077780547209, guid: bd7b9dee928e57a42b9114159b59e2a3, type: 3}
+  rangedMinionPrefab: {fileID: 2379972077780547209, guid: 49f4ddee6d9dc1b45bf5d845965325a5, type: 3}
   spawnPoints:
   - {fileID: 1176192662}
   spawnInterval: 20
@@ -3494,45 +3474,6 @@ MonoBehaviour:
   damageAmount: 15
   trapVisual: {fileID: 1826823735867886, guid: 84b6dcc9019b86143812a6901fecd619, type: 3}
   activationDistance: 2
---- !u!114 &1491958018
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1491958013}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
-  m_UseLocal: 0
---- !u!114 &1491958019
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1491958013}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 1
-  observableSearch: 2
-  ObservedComponents:
-  - {fileID: 1491958018}
-  sceneViewId: 2
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
 --- !u!114 &1504991605 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5852061366576485105, guid: afc4ee5dd130082408388c88dbaaf717, type: 3}
@@ -3663,45 +3604,6 @@ MonoBehaviour:
   - EnemyMinionSpawner1
   - EnemyMinionSpawner2
   - EnemyMinionSpawner3
---- !u!114 &1560304137
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1560304133}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
-  m_UseLocal: 0
---- !u!114 &1560304138
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1560304133}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 1
-  observableSearch: 2
-  ObservedComponents:
-  - {fileID: 1560304137}
-  sceneViewId: 5
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
 --- !u!1 &1563265498
 GameObject:
   m_ObjectHideFlags: 0
@@ -4030,45 +3932,6 @@ MonoBehaviour:
   damageAmount: 15
   trapVisual: {fileID: 1826823735867886, guid: 84b6dcc9019b86143812a6901fecd619, type: 3}
   activationDistance: 2
---- !u!114 &1762557802
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1762557797}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
-  m_UseLocal: 0
---- !u!114 &1762557803
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1762557797}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 1
-  observableSearch: 2
-  ObservedComponents:
-  - {fileID: 1762557802}
-  sceneViewId: 1
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
 --- !u!1 &1819983673
 GameObject:
   m_ObjectHideFlags: 0
@@ -4784,12 +4647,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1411054063627100, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2003113622}
-    - targetCorrespondingSourceObject: {fileID: 1411054063627100, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2003113624}
-    - targetCorrespondingSourceObject: {fileID: 1411054063627100, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2003113623}
   m_SourcePrefab: {fileID: 100100000, guid: a5b2c973fbd4bcf49b07ded49a003a51, type: 3}
 --- !u!4 &2003113618 stripped
 Transform:
@@ -4811,45 +4668,6 @@ MonoBehaviour:
   damageAmount: 15
   trapVisual: {fileID: 1826823735867886, guid: 84b6dcc9019b86143812a6901fecd619, type: 3}
   activationDistance: 2
---- !u!114 &2003113623
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1842287307}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
-  m_UseLocal: 0
---- !u!114 &2003113624
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1842287307}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 1
-  observableSearch: 2
-  ObservedComponents:
-  - {fileID: 2003113623}
-  sceneViewId: 3
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
 --- !u!114 &2056461802 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1098979320545334629, guid: afc4ee5dd130082408388c88dbaaf717, type: 3}
@@ -5387,15 +5205,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 768653831503369834, guid: f8f9b755488f8cc4fa5e8c3675c27405, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 75.57221
+      value: 82.23721
       objectReference: {fileID: 0}
     - target: {fileID: 768653831503369834, guid: f8f9b755488f8cc4fa5e8c3675c27405, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 6.439897
+      value: 6.4398985
       objectReference: {fileID: 0}
     - target: {fileID: 768653831503369834, guid: f8f9b755488f8cc4fa5e8c3675c27405, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 123.14239
+      value: 124.784195
       objectReference: {fileID: 0}
     - target: {fileID: 768653831503369834, guid: f8f9b755488f8cc4fa5e8c3675c27405, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5596,12 +5414,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4541624740231659275, guid: bf34751bdd4662d4bb185ea79102f6b0, type: 3}
       insertIndex: -1
       addedObject: {fileID: 8908619924040436903}
-    - targetCorrespondingSourceObject: {fileID: 4541624740231659275, guid: bf34751bdd4662d4bb185ea79102f6b0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 8908619924040436905}
-    - targetCorrespondingSourceObject: {fileID: 4541624740231659275, guid: bf34751bdd4662d4bb185ea79102f6b0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 8908619924040436904}
   m_SourcePrefab: {fileID: 100100000, guid: bf34751bdd4662d4bb185ea79102f6b0, type: 3}
 --- !u!4 &3972104592841364166 stripped
 Transform:
@@ -5675,14 +5487,6 @@ PrefabInstance:
     - target: {fileID: 8764284995304616237, guid: 89fb00d3296e3c84c8e14117cdc401c1, type: 3}
       propertyPath: minionsPerWave
       value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 8764284995304616237, guid: 89fb00d3296e3c84c8e14117cdc401c1, type: 3}
-      propertyPath: meleeMinionPrefabName
-      value: Minions/EnemyMeleeMinion
-      objectReference: {fileID: 0}
-    - target: {fileID: 8764284995304616237, guid: 89fb00d3296e3c84c8e14117cdc401c1, type: 3}
-      propertyPath: rangedMinionPrefabName
-      value: Minions/EnemyRangedMinion
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5834,12 +5638,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8506332207694355565, guid: dae13685778e3294697bd8dbf5e3ab63, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5785139589738350056}
-    - targetCorrespondingSourceObject: {fileID: 8506332207694355565, guid: dae13685778e3294697bd8dbf5e3ab63, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5785139589738350058}
-    - targetCorrespondingSourceObject: {fileID: 8506332207694355565, guid: dae13685778e3294697bd8dbf5e3ab63, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5785139589738350057}
   m_SourcePrefab: {fileID: 100100000, guid: dae13685778e3294697bd8dbf5e3ab63, type: 3}
 --- !u!4 &5785139589738350046 stripped
 Transform:
@@ -5864,45 +5662,6 @@ MonoBehaviour:
   precomputeOutline: 0
   bakeKeys: []
   bakeValues: []
---- !u!114 &5785139589738350057
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1032560869}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
-  m_UseLocal: 0
---- !u!114 &5785139589738350058
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1032560869}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 1
-  observableSearch: 2
-  ObservedComponents:
-  - {fileID: 5785139589738350057}
-  sceneViewId: 6
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
 --- !u!1001 &6747945267247766990
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6636,17 +6395,9 @@ PrefabInstance:
       propertyPath: minionsPerWave
       value: 10
       objectReference: {fileID: 0}
-    - target: {fileID: 3673321132237095353, guid: 55917729b23366f44b1d362ac5c91a61, type: 3}
-      propertyPath: meleeMinionPrefabName
-      value: 'Minions/MeleeMinion '
-      objectReference: {fileID: 0}
-    - target: {fileID: 3673321132237095353, guid: 55917729b23366f44b1d362ac5c91a61, type: 3}
-      propertyPath: rangedMinionPrefabName
-      value: Minions/RangedMinion
-      objectReference: {fileID: 0}
     - target: {fileID: 6624408044861789922, guid: 55917729b23366f44b1d362ac5c91a61, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 80.1
+      value: 79.91
       objectReference: {fileID: 0}
     - target: {fileID: 6624408044861789922, guid: 55917729b23366f44b1d362ac5c91a61, type: 3}
       propertyPath: m_LocalPosition.y
@@ -6654,7 +6405,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6624408044861789922, guid: 55917729b23366f44b1d362ac5c91a61, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 119.1
+      value: 120.56
       objectReference: {fileID: 0}
     - target: {fileID: 6624408044861789922, guid: 55917729b23366f44b1d362ac5c91a61, type: 3}
       propertyPath: m_LocalRotation.w
@@ -7005,45 +6756,6 @@ MonoBehaviour:
   precomputeOutline: 0
   bakeKeys: []
   bakeValues: []
---- !u!114 &8908619924040436904
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 574495517310868319}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
-  m_UseLocal: 0
---- !u!114 &8908619924040436905
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 574495517310868319}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 1
-  observableSearch: 2
-  ObservedComponents:
-  - {fileID: 8908619924040436904}
-  sceneViewId: 4
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
 --- !u!1001 &8986773110167954279
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7111,15 +6823,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1116433271763721024, guid: f225bad226bd3134b9fb5f8690c2d370, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 75.57221
+      value: 82.23721
       objectReference: {fileID: 0}
     - target: {fileID: 1116433271763721024, guid: f225bad226bd3134b9fb5f8690c2d370, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 6.439897
+      value: 6.4398985
       objectReference: {fileID: 0}
     - target: {fileID: 1116433271763721024, guid: f225bad226bd3134b9fb5f8690c2d370, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 123.14239
+      value: 124.784195
       objectReference: {fileID: 0}
     - target: {fileID: 1116433271763721024, guid: f225bad226bd3134b9fb5f8690c2d370, type: 3}
       propertyPath: m_LocalRotation.w

@@ -21,6 +21,8 @@ public class GetPlayerData : ScriptableObject
     public bool TrapTwoIsBuilded = false;//Tuzak2 �n�a Edildi Mi?
     public bool TrapThreeIsBuilded = false;//Tuzak3 �n�a Edildi Mi?
 
+    private RegionClickHandler regionClickHandler;
+
     //----------------------------------- B�NA AKTF�LE�T�RME FONKS�YONLARI --------------------------------------------------------------//
     public void ActiveTowerOne()
     {
@@ -186,6 +188,15 @@ public class GetPlayerData : ScriptableObject
     {
         currentSoldierAmount = (int)savasciSayisi;
         currentArcherAmount = (int)okcuSayisi;
+    }
+
+    public void SetRegionHandler(RegionClickHandler handler)
+    {
+        regionClickHandler = handler;
+    }
+    public void conquerKingdom(string conqueringKingdom, string conqueredKingdom)
+    {
+        regionClickHandler.ConquerKingdom(conqueringKingdom, conqueredKingdom);
     }
 
 }

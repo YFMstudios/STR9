@@ -67,7 +67,16 @@ public class Kingdom : MonoBehaviour
 
     }
 
-
+    public static int returnsKingdomNumbers(string kingdom)
+    {
+        if (kingdom == "Arianopol") return 0;
+        else if (kingdom == "Alfgard") return 1;
+        else if (kingdom == "Akhadzria") return 2;
+        else if (kingdom == "Dhamuron") return 3;
+        else if (kingdom == "Lexion") return 4;
+        else if (kingdom == "Zephyrion") return 5;
+        else return -1;
+    }
 
 
     public void findOwner()

@@ -1,66 +1,112 @@
-using Photon.Pun;
-using Photon.Realtime;
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-public class EnemyMinionSpawner : MonoBehaviourPunCallbacks
+public class EnemyMinionSpawner : MonoBehaviour
 {
-    public float meleeMinionMoveSpeed;      
-    public float rangedMinionMoveSpeed;     
+    public float meleeMinionMoveSpeed;      // Yakýn dövüþ minion hareket hýzý
+    public float rangedMinionMoveSpeed;     // Uzak dövüþ minion hareket hýzý
 
-    // Sabit prefab adlarÄ± (Inspector'da gÃ¶rÃ¼nmeyecek)
-    private const string ENEMY_MELEE_MINION_PREFAB = "Minions/EnemyMeleeMinion";
-    private const string ENEMY_RANGED_MINION_PREFAB = "Minions/EnemyRangedMinion";
+    public GameObject meleeMinionPrefab;    // Yakýn dövüþ minion prefabý
+    public GameObject rangedMinionPrefab;   // Uzak dövüþ minion prefabý
+    public Transform[] spawnPoints;         // Minionlarýn doðacaðý noktalar
+    public float spawnInterval = 20.0f;     // Minion dalgalarý arasýndaki aralýk
+    public int minionsPerWave = 10;         // Her dalga için minion sayýsý (5 melee, 5 ranged)
+    public float delayBetweenMinions;       // Minionlar arasý gecikme süresi
 
-    public Transform[] spawnPoints;         
-    public float spawnInterval = 20.0f;     
-    public int minionsPerWave = 10;         // Her dalgada spawn edilecek minyon sayÄ±sÄ± (Ã¶rneÄŸin 10: 5 melee + 5 ranged)
-    public float delayBetweenMinions;       
+    private ObjectPool meleeMinionPool;     // Yakýn dövüþ minionlarý için obje havuzu
+    private ObjectPool rangedMinionPool;    // Uzak dövüþ minionlarý için obje havuzu
 
     private void Start()
     {
-        if (PhotonNetwork.IsMasterClient)
-        {
-            StartCoroutine(SpawnMinions());
-        }
+        // meleeMinionPool ve rangedMinionPool boyutlarýný 5 yaparak her dalga için yeterli sayýda minion saðlýyoruz
+        meleeMinionPool = new ObjectPool(meleeMinionPrefab, 5, transform);
+        rangedMinionPool = new ObjectPool(rangedMinionPrefab, 5, transform);
+
+        StartCoroutine(SpawnMinions()); // Minionlarý doðurma iþlemini baþlat
     }
 
     private IEnumerator SpawnMinions()
     {
-        int wavesToSpawn = 2; // Sadece 2 dalga spawn edilecek
-        for (int wave = 0; wave < wavesToSpawn; wave++)
+        while (true)
         {
             for (int i = 0; i < minionsPerWave; i++)
             {
-                bool isMelee = (i < minionsPerWave / 2); // Ä°lk yarÄ±sÄ± melee, ikinci yarÄ±sÄ± ranged
-                float speed = isMelee ? meleeMinionMoveSpeed : rangedMinionMoveSpeed;
-                SpawnMinionForAll(isMelee, speed);
+                // Ýlk 5 minion melee olacak, sonraki 5 minion ranged olacak
+                if (i < 5) // Ýlk 5 minion melee
+                {
+                    SpawnMinion(meleeMinionPool, meleeMinionMoveSpeed);
+                }
+                else // Sonraki 5 minion ranged
+                {
+                    SpawnMinion(rangedMinionPool, rangedMinionMoveSpeed);
+                }
+
                 yield return new WaitForSeconds(delayBetweenMinions);
             }
-            float waveDelay = spawnInterval - (delayBetweenMinions * minionsPerWave);
-            yield return new WaitForSeconds(waveDelay);
+
+            yield return new WaitForSeconds(spawnInterval - delayBetweenMinions * minionsPerWave);
         }
     }
 
-    private void SpawnMinionForAll(bool isMelee, float moveSpeed)
+    private void SpawnMinion(ObjectPool pool, float moveSpeed)
     {
-        int spawnIndex = Random.Range(0, spawnPoints.Length);
-        Transform spawnPoint = spawnPoints[spawnIndex];
+        GameObject minion = pool.Get();                             // Obje havuzundan bir minion al
+        Transform spawnPoint = spawnPoints[Random.Range(0, spawnPoints.Length)];  // Doðum noktasýný rastgele seç
+        minion.transform.position = spawnPoint.position;           // Minionu doðum noktasýna yerleþtir
+        minion.transform.rotation = spawnPoint.rotation;           // Minionun doðum noktasýna göre rotasyonunu ayarla
 
-        string prefabName = isMelee ? ENEMY_MELEE_MINION_PREFAB : ENEMY_RANGED_MINION_PREFAB;
+        UnityEngine.AI.NavMeshAgent minionAgent = minion.GetComponent<UnityEngine.AI.NavMeshAgent>();
+        minionAgent.speed = moveSpeed;                              // Minionun hareket hýzýný ayarla
+    }
 
-        if (!PhotonNetwork.IsMasterClient) return;
+    // Obje havuzu sýnýfý
+    private class ObjectPool
+    {
+        private Queue<GameObject> poolQueue;    // Obje havuzu kuyruðu
+        private GameObject prefab;              // Havuzdaki obje prefabý
+        private Transform parent;               // Havuzun parentý
 
-        GameObject minion = PhotonNetwork.Instantiate(
-            prefabName,
-            spawnPoint.position,
-            spawnPoint.rotation
-        );
-
-        var agent = minion.GetComponent<UnityEngine.AI.NavMeshAgent>();
-        if (agent != null)
+        public ObjectPool(GameObject prefab, int initialSize, Transform parent)
         {
-            agent.speed = moveSpeed;
+            this.prefab = prefab;
+            this.parent = parent;
+            poolQueue = new Queue<GameObject>();
+
+            for (int i = 0; i < initialSize; i++)
+            {
+                GameObject obj = Instantiate(prefab, parent);    // Prefabý havuza ekleyerek obje oluþtur
+                obj.SetActive(false);                             // Objeyi etkisiz hale getir
+                poolQueue.Enqueue(obj);                           // Objeyi havuza ekle
+            }
+        }
+
+        public GameObject Get()
+        {
+            if (poolQueue.Count == 0)
+            {
+                AddObjects(1);          // Havuzda obje kalmazsa yeni objeler ekle
+            }
+
+            GameObject obj = poolQueue.Dequeue();    // Kuyruktan bir obje al
+            obj.SetActive(true);                    // Objeyi etkin hale getir
+            return obj;                             // Objeyi döndür
+        }
+
+        public void ReturnToPool(GameObject obj)
+        {
+            obj.SetActive(false);       // Objeyi etkisiz hale getir
+            poolQueue.Enqueue(obj);     // Objeyi havuza geri ekle
+        }
+
+        private void AddObjects(int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                GameObject obj = Instantiate(prefab, parent);    // Prefabtan obje oluþtur
+                obj.SetActive(false);                             // Objeyi etkisiz hale getir
+                poolQueue.Enqueue(obj);                           // Objeyi havuza ekle
+            }
         }
     }
 }

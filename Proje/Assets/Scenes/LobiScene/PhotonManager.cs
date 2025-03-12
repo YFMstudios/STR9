@@ -7,6 +7,7 @@ using TMPro;
 using System.Collections.Generic;
 using System.Collections;
 
+
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
     public TMP_InputField roomNameInputField;
@@ -33,109 +34,92 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     private bool isJoiningRoom = false;
 
     private Coroutine refreshCoroutine;
-
     void Start()
+{
+    // PhotonNetwork'e bağlanmaya çalışıyoruz
+    if (!PhotonNetwork.IsConnected)
     {
-        // PhotonNetwork'e bağlanmaya çalışıyoruz
-        if (!PhotonNetwork.IsConnected)
+        PhotonNetwork.ConnectUsingSettings();
+        PhotonNetwork.GameVersion = "1.0"; // Versiyon kontrolü
+        Debug.Log("Photon'a bağlanılıyor...");
+    }
+    else if (PhotonNetwork.IsConnected && !PhotonNetwork.InLobby)
+    {
+        // Eğer bağlıysak ama lobiye katılmadıysak, lobiye katıl
+        PhotonNetwork.JoinLobby();
+    }
+    else
+    {
+        // Eğer zaten lobiye katılınmışsa, oda listesini yenile
+        RefreshRoomList();
+    }
+}
+
+public override void OnConnectedToMaster()
+{
+    // Bağlantı tamamlandı ve lobiye katılmaya hazır
+    if (PhotonNetwork.IsConnectedAndReady)
+    {
+        Debug.Log("Lobiye başarıyla katıldınız!");
+
+        // Oda oluşturma işlemi
+        if (isCreatingRoom && !string.IsNullOrEmpty(roomNameToCreate))
         {
-            PhotonNetwork.ConnectUsingSettings();
-            PhotonNetwork.GameVersion = "1.0"; // Versiyon kontrolü
-            Debug.Log("Photon'a bağlanılıyor...");
+            CreateRoomInternal(roomNameToCreate);
+            isCreatingRoom = false;
+            roomNameToCreate = null;
         }
-        else if (PhotonNetwork.IsConnected && !PhotonNetwork.InLobby)
+
+        // Oda listesini güncelleme veya yenileme işlemi
+        if (shouldRefreshRoomList)
         {
-            // Eğer bağlıysak ama lobiye katılmadıysak, lobiye katıl
-            PhotonNetwork.JoinLobby();
+            shouldRefreshRoomList = false;
+            RefreshCachedRoomList();
         }
         else
         {
-            // Eğer zaten lobiye katılınmışsa, oda listesini yenile
             RefreshRoomList();
         }
     }
-
-    public override void OnConnectedToMaster()
+    else
     {
-        // Bağlantı master server'a yapıldı ama lobiye otomatik girilmemiş olabilir
-        if (!PhotonNetwork.IsConnectedAndReady)
-        {
-            Debug.Log("Bağlantı henüz hazır değil, lobiye katılamıyoruz.");
-            return;
-        }
-
-        // Eğer zaten lobiye katılıyorsak tekrar çağırmaya gerek yok
-        if (PhotonNetwork.NetworkClientState == ClientState.JoiningLobby)
-        {
-            Debug.Log("Şu anda lobiye katılma sürecindeyiz, tekrar JoinLobby() çağrılmıyor.");
-            return;
-        }
-
-        // Eğer zaten lobideysek direkt oda listesini yenileyebilir veya oda oluşturma yapabiliriz
-        if (PhotonNetwork.InLobby)
-        {
-            Debug.Log("Zaten lobideyiz. Gerekli işlemleri yapıyoruz...");
-
-            // Oda oluşturma işlemi
-            if (isCreatingRoom && !string.IsNullOrEmpty(roomNameToCreate))
-            {
-                CreateRoomInternal(roomNameToCreate);
-                isCreatingRoom = false;
-                roomNameToCreate = null;
-            }
-
-            // Oda listesini güncelleme veya yenileme işlemi
-            if (shouldRefreshRoomList)
-            {
-                shouldRefreshRoomList = false;
-                RefreshCachedRoomList();
-            }
-            else
-            {
-                RefreshRoomList();
-            }
-            return;
-        }
-
-        // Yukarıdaki durumların hiçbiri değilse, lobiye katıl
-        Debug.Log("Master'a bağlandık, lobiye katılınıyor...");
-        PhotonNetwork.JoinLobby();
+        Debug.Log("Bağlantı henüz tamamlanmadı. Lobiye katılma işlemi başlatılmadı.");
     }
+}
 
-    /// <summary>
-    /// Oda listesini belli aralıklarla otomatik yenileyen coroutine
-    /// </summary>
+
+
     private IEnumerator AutoRefreshRoomList()
+{
+    while (true)
     {
-        while (true)
-        {
-            // Sadece bağlantı hazır ve lobideysek yenileme yap
-            if (PhotonNetwork.IsConnectedAndReady && PhotonNetwork.InLobby)
-            {
-                RefreshRoomList();
-            }
-            yield return new WaitForSeconds(5f);
-        }
+        RefreshRoomList(); // Oda listesini yenile
+        yield return new WaitForSeconds(5f); // 5 saniyede bir çalıştır
     }
+}
 
-    public new void OnEnable()
+public new void OnEnable()
+{
+    // Üst sınıfın metodunu çağırmak isterseniz:
+    base.OnEnable();
+    // Kendi kodunuz
+    if (refreshCoroutine == null)
     {
-        base.OnEnable();
-        if (refreshCoroutine == null)
-        {
-            refreshCoroutine = StartCoroutine(AutoRefreshRoomList());
-        }
+        refreshCoroutine = StartCoroutine(AutoRefreshRoomList());
     }
+}
 
-    public new void OnDisable()
+public new void OnDisable()
+{
+    // Üst sınıfın metodunu çağırmak isterseniz:
+    base.OnDisable();
+    // Kendi kodunuza
+    if (refreshCoroutine != null)
     {
-        base.OnDisable();
-        if (refreshCoroutine != null)
-        {
-            StopCoroutine(refreshCoroutine);
-            refreshCoroutine = null;
-        }
+        StopCoroutine(refreshCoroutine);
+        refreshCoroutine = null;
     }
+}
 
     // Oda oluşturma
     public void CreateRoom()
@@ -161,7 +145,6 @@ public class PhotonManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        // Eğer lobide değilsek önce lobiye katılalım
         if (!PhotonNetwork.InLobby)
         {
             Debug.LogWarning("Lobiye katılınıyor...");
@@ -176,36 +159,41 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
 
     private void CreateRoomInternal(string roomName)
+{
+    if (string.IsNullOrEmpty(roomName))
     {
-        if (string.IsNullOrEmpty(roomName))
-        {
-            Debug.LogWarning("Lütfen bir oda adı girin!");
-            return;
-        }
-
-        // 6 basamaklı rastgele bir sayı oluştur
-        string roomNumber = Random.Range(100000, 999999).ToString();
-
-        // Oda ismi ve rastgele sayıyı birleştir
-        string fullRoomName = $"{roomName}_{roomNumber}";
-
-        RoomOptions roomOptions = new RoomOptions
-        {
-            MaxPlayers = 6,           // Maksimum 6 oyuncu
-            IsVisible = true,         // Oda herkes tarafından görülebilir
-            IsOpen = true,            // Oda yeni oyunculara açık
-            PlayerTtl = 0,            // Oyuncu odadan çıkar çıkmaz bilgileri sıfırlanır
-            EmptyRoomTtl = 300000,    // Oda boş kaldıktan sonra 5 dakika açık kalır
-            CustomRoomProperties = new ExitGames.Client.Photon.Hashtable
-            {
-                { "war", null }       // 'war' bilgisi oda özelliklerine ekleniyor (başlangıçta null olarak)
-            },
-            CustomRoomPropertiesForLobby = new string[] { "war" } // lobby'de 'war' bilgisini görmek için
-        };
-
-        PhotonNetwork.CreateRoom(fullRoomName, roomOptions);
-        Debug.Log($"Oda oluşturma isteği gönderildi: {fullRoomName}");
+        Debug.LogWarning("Lütfen bir oda adı girin!");
+        return;
     }
+
+    // 6 basamaklı rastgele bir sayı oluştur
+    string roomNumber = Random.Range(100000, 999999).ToString();
+
+    // Oda ismi ve rastgele sayıyı birleştir
+    string fullRoomName = $"{roomName}_{roomNumber}";
+
+    RoomOptions roomOptions = new RoomOptions
+{
+    MaxPlayers = 6,           // Maksimum 6 oyuncu
+    IsVisible = true,         // Oda herkes tarafından görülebilir
+    IsOpen = true,            // Oda yeni oyunculara açık
+    PlayerTtl = 0,            // Oyuncu odadan çıkar çıkmaz bilgileri sıfırlanır
+    EmptyRoomTtl = 300000,    // Oda boş kaldıktan sonra 5 dakika açık kalır
+    CustomRoomProperties = new ExitGames.Client.Photon.Hashtable
+    {
+        { "war", null }       // 'war' bilgisi oda özelliklerine ekleniyor (başlangıçta null olarak)
+    },
+    CustomRoomPropertiesForLobby = new string[] { "war" } // lobby'de 'war' bilgisini görmek için
+};
+
+
+    PhotonNetwork.CreateRoom(fullRoomName, roomOptions);
+    Debug.Log($"Oda oluşturma isteği gönderildi: {fullRoomName}");
+}
+
+
+
+
 
     public override void OnCreatedRoom()
     {
@@ -231,46 +219,25 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.LogError($"Oda oluşturma başarısız: {message}");
     }
 
-    /// <summary>
-    /// Odadan çıkıldığında tekrar lobiye katılmak için bekleyerek işlem yapıyoruz.
-    /// </summary>
     public override void OnLeftRoom()
     {
         Debug.Log("Odadan çıkıldı.");
 
-        // Eğer başka bir odaya katılma isteği varsa
         if (isJoiningRoom && !string.IsNullOrEmpty(roomNameToJoin))
         {
             PhotonNetwork.JoinRoom(roomNameToJoin);
             isJoiningRoom = false;
             roomNameToJoin = null;
-            return;
         }
-
-        // Eğer oda listesini yenilemek istiyorsak veya lobide değilsek
-        if (shouldRefreshRoomList || !PhotonNetwork.InLobby)
+        else if (shouldRefreshRoomList)
         {
-            StartCoroutine(WaitAndJoinLobby());
+            // Odadan çıkıldıktan sonra lobiye katıl
+            PhotonNetwork.JoinLobby();
         }
-    }
-
-    private IEnumerator WaitAndJoinLobby()
-    {
-        // Odadan tamamen çıkılana kadar bekle
-        while (PhotonNetwork.InRoom || PhotonNetwork.NetworkClientState == ClientState.Leaving)
+        else if (!PhotonNetwork.InLobby)
         {
-            yield return null;
+            PhotonNetwork.JoinLobby();
         }
-        Debug.Log("Lobiye katılınıyor...");
-
-        // Eğer zaten lobiye katılıyorsak tekrar çağırmaya gerek yok
-        if (PhotonNetwork.NetworkClientState == ClientState.JoiningLobby || PhotonNetwork.InLobby)
-        {
-            Debug.LogWarning("Zaten lobiye katılma sürecindeyiz veya lobideyiz.");
-            yield break;
-        }
-
-        PhotonNetwork.JoinLobby();
     }
 
     // Odaları listeleme ve UI ile gösterme
@@ -295,10 +262,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 int index = cachedRoomList.FindIndex(r => r.Name == roomInfo.Name);
                 if (index == -1)
                 {
+                    // Oda listede yok, ekle
                     cachedRoomList.Add(roomInfo);
                 }
                 else
                 {
+                    // Oda listede var, güncelle
                     cachedRoomList[index] = roomInfo;
                 }
             }
@@ -307,49 +276,36 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         RefreshCachedRoomList();
     }
 
-    /// <summary>
-    /// Kullanıcının butona basıp oda listesini manuel yenilemek istediğinde çağrılır.
-    /// </summary>
+    // Refresh butonuna basıldığında çağrılacak metot
     public void RefreshRoomList()
     {
-        if (!PhotonNetwork.IsConnectedAndReady)
+        if (PhotonNetwork.IsConnectedAndReady)
         {
-            Debug.LogWarning("Sunucuya bağlı değilsiniz!");
-            return;
-        }
-
-        // Eğer zaten lobiye katılma sürecindeysek tekrar çağırmayalım
-        if (PhotonNetwork.NetworkClientState == ClientState.JoiningLobby)
-        {
-            Debug.LogWarning("Zaten lobiye katılmaya çalışıyoruz, tekrar denemeye gerek yok.");
-            return;
-        }
-
-        // Eğer zaten lobideysek direkt listeyi yenile
-        if (PhotonNetwork.InLobby)
-        {
-            Debug.Log("Oda listesi yenileniyor...");
-            RefreshCachedRoomList();
-            return;
-        }
-
-        if (PhotonNetwork.InRoom)
-        {
-            Debug.Log("Odadan çıkılıyor...");
-            shouldRefreshRoomList = true;
-            PhotonNetwork.LeaveRoom();
+            if (PhotonNetwork.InRoom)
+            {
+                Debug.Log("Odadan çıkılıyor...");
+                shouldRefreshRoomList = true;
+                PhotonNetwork.LeaveRoom();
+            }
+            else if (!PhotonNetwork.InLobby)
+            {
+                Debug.Log("Lobiye katılınıyor...");
+                shouldRefreshRoomList = true;
+                PhotonNetwork.JoinLobby();
+            }
+            else
+            {
+                Debug.Log("Oda listesi yenileniyor...");
+                // Oda listesini güncelle ve yazdır
+                RefreshCachedRoomList();
+            }
         }
         else
         {
-            Debug.Log("Lobiye katılınıyor...");
-            shouldRefreshRoomList = true;
-            PhotonNetwork.JoinLobby();
+            Debug.LogWarning("Sunucuya bağlı değilsiniz!");
         }
     }
 
-    /// <summary>
-    /// Elimizdeki oda listesini (cachedRoomList) arayüzde günceller.
-    /// </summary>
     public void RefreshCachedRoomList()
     {
         // Mevcut prefabları temizle
@@ -363,74 +319,82 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             float yPosition = 0f;
 
-            for (int i = 0; i < cachedRoomList.Count; i++)
+            // Odaları sıralamak için (yeni odalar en alta eklensin)
+          // Odaları sıralamak için (yeni odalar en alta eklensin)
+for (int i = 0; i < cachedRoomList.Count; i++)
+{
+    RoomInfo room = cachedRoomList[i];
+
+    // Oda numarası prefabını oluştur
+    GameObject roomNumberObj = Instantiate(roomNumberPrefab, contentParent);
+    roomNumberObj.GetComponent<TMP_Text>().text = room.Name.Split('_')[1]; // Oda numarası
+    roomNumberObj.transform.position = roomNumberPrefab.transform.position + new Vector3(0, -yPosition, 0);
+
+    // Oda ismi prefabını oluştur
+    GameObject roomNameObj = Instantiate(roomNamePrefab, contentParent);
+    roomNameObj.GetComponent<TMP_Text>().text = room.Name.Split('_')[0]; // Oda ismi
+    roomNameObj.transform.position = roomNamePrefab.transform.position + new Vector3(0, -yPosition, 0);
+
+    // Oyuncu sayısı prefabını oluştur
+    GameObject playerCountObj = Instantiate(playerCountPrefab, contentParent);
+    playerCountObj.GetComponent<TMP_Text>().text = $"{room.PlayerCount}/{room.MaxPlayers}";
+    playerCountObj.transform.position = playerCountPrefab.transform.position + new Vector3(0, -yPosition, 0);
+
+    // Odaya katılma butonu prefabını oluştur
+    GameObject joinButtonObj = Instantiate(roomJoinButtonPrefab, contentParent);
+    joinButtonObj.transform.position = roomJoinButtonPrefab.transform.position + new Vector3(0, -yPosition, 0);
+
+    // Butonu aktif hale getirin
+    joinButtonObj.SetActive(true);
+
+    // Butonun tıklama olayını ayarla
+    Button joinButton = joinButtonObj.GetComponent<Button>();
+    if (joinButton != null)
+    {
+        // Oda ismini doğru bir şekilde yakala
+        string roomNameCopy = room.Name; // Oda ismini tamamen alıyoruz
+        Debug.Log($"Join button oluşturuluyor. Oda ismi: {roomNameCopy}"); // Oda ismini logla
+
+        // Oda adı boşsa buton tıklama olayını ekleme
+        joinButton.onClick.AddListener(() =>
+        {
+            // Eğer oda adı boşsa giriş yapma işlemini iptal et
+            if (string.IsNullOrEmpty(roomNameCopy))
             {
-                RoomInfo room = cachedRoomList[i];
-
-                // Oda numarası prefabını oluştur
-                GameObject roomNumberObj = Instantiate(roomNumberPrefab, contentParent);
-                roomNumberObj.GetComponent<TMP_Text>().text = room.Name.Split('_')[1]; // Oda numarası
-                roomNumberObj.transform.position = roomNumberPrefab.transform.position + new Vector3(0, -yPosition, 0);
-
-                // Oda ismi prefabını oluştur
-                GameObject roomNameObj = Instantiate(roomNamePrefab, contentParent);
-                roomNameObj.GetComponent<TMP_Text>().text = room.Name.Split('_')[0]; // Oda ismi
-                roomNameObj.transform.position = roomNamePrefab.transform.position + new Vector3(0, -yPosition, 0);
-
-                // Oyuncu sayısı prefabını oluştur
-                GameObject playerCountObj = Instantiate(playerCountPrefab, contentParent);
-                playerCountObj.GetComponent<TMP_Text>().text = $"{room.PlayerCount}/{room.MaxPlayers}";
-                playerCountObj.transform.position = playerCountPrefab.transform.position + new Vector3(0, -yPosition, 0);
-
-                // Odaya katılma butonu prefabını oluştur
-                GameObject joinButtonObj = Instantiate(roomJoinButtonPrefab, contentParent);
-                joinButtonObj.transform.position = roomJoinButtonPrefab.transform.position + new Vector3(0, -yPosition, 0);
-
-                joinButtonObj.SetActive(true);
-                Button joinButton = joinButtonObj.GetComponent<Button>();
-                if (joinButton != null)
-                {
-                    // Oda ismini doğru bir şekilde yakala
-                    string roomNameCopy = room.Name;
-                    Debug.Log($"Join button oluşturuluyor. Oda ismi: {roomNameCopy}");
-
-                    // Tıklama olayı
-                    joinButton.onClick.AddListener(() =>
-                    {
-                        if (string.IsNullOrEmpty(roomNameCopy))
-                        {
-                            Debug.LogError("Oda adı boş olamaz! Giriş yapılmadı.");
-                            return;
-                        }
-
-                        if (PhotonNetwork.JoinRoom(roomNameCopy))
-                        {
-                            Debug.Log("Odaya katılma isteği gönderildi: " + roomNameCopy);
-                        }
-                        else
-                        {
-                            Debug.LogError("Odaya katılmak başarısız oldu.");
-                        }
-                    });
-                }
-                else
-                {
-                    Debug.LogWarning("Join Button bir Button bileşenine sahip değil.");
-                }
-
-                roomEntries.Add(roomNumberObj);
-                roomEntries.Add(roomNameObj);
-                roomEntries.Add(playerCountObj);
-                roomEntries.Add(joinButtonObj);
-
-                yPosition += yOffset; // Her satır için yOffset kadar aşağı kaydır
+                Debug.LogError("Oda adı boş olamaz! Giriş yapılmadı.");
+                return; // Oda adı boşsa işlem sonlandırılır
             }
+
+            // Odaya katılma işlemi
+            if (PhotonNetwork.JoinRoom(roomNameCopy))
+            {
+                Debug.Log("Odaya katılındı: " + roomNameCopy);
+            }
+            else
+            {
+                Debug.LogError("Odaya katılmak başarısız oldu.");
+            }
+        });
+    }
+    else
+    {
+        Debug.LogWarning("Join Button bir Button bileşenine sahip değil.");
+    }
+
+    roomEntries.Add(roomNumberObj);
+    roomEntries.Add(roomNameObj);
+    roomEntries.Add(playerCountObj);
+    roomEntries.Add(joinButtonObj);
+
+    yPosition += yOffset; // Her satır için yOffset kadar aşağı kaydır
+}
         }
         else
         {
             Debug.Log("Oda listesi boş.");
         }
     }
+
 
     public override void OnJoinedRoom()
     {
@@ -439,80 +403,63 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     }
 
     public void CloseRoomCreationPanel()
+{
+    if (roomCreationPanel != null)
     {
-        if (roomCreationPanel != null)
-        {
-            roomCreationPanel.SetActive(false);
-            Debug.Log("Oda oluşturma paneli kapatıldı.");
-        }
-        else
-        {
-            Debug.LogWarning("roomCreationPanel atanmamış!");
-        }
+        roomCreationPanel.SetActive(false);
+        Debug.Log("Oda oluşturma paneli kapatıldı.");
+    }
+    else
+    {
+        Debug.LogWarning("roomCreationPanel atanmamış!");
+    }
+}
+
+// Buton ile çağrılacak, bağlantıyı yeniden başlatıp oda listesini güncelleyen fonksiyon
+public void ReconnectAndRefreshRoomList()
+{
+    StartCoroutine(ReconnectAndRefresh());
+}
+
+private IEnumerator ReconnectAndRefresh()
+{
+    // Kullanıcıyı önce bağlantıdan çıkar
+    if (PhotonNetwork.IsConnected)
+    {
+        Debug.Log("Photon bağlantısı kesiliyor...");
+        PhotonNetwork.Disconnect();
     }
 
-    // Buton ile çağrılacak, bağlantıyı yeniden başlatıp oda listesini güncelleyen fonksiyon
-    public void ReconnectAndRefreshRoomList()
+    // Bağlantının tamamen kesilmesini bekle
+    while (PhotonNetwork.IsConnected)
     {
-        StartCoroutine(ReconnectAndRefresh());
+        yield return null;
     }
 
-    private IEnumerator ReconnectAndRefresh()
+    Debug.Log("Photon bağlantısı yeniden başlatılıyor...");
+    // Photon'a yeniden bağlan
+    PhotonNetwork.ConnectUsingSettings();
+    PhotonNetwork.GameVersion = "1.0";
+
+    // Bağlantının yeniden kurulmasını bekle
+    while (!PhotonNetwork.IsConnectedAndReady)
     {
-        // Kullanıcıyı önce bağlantıdan çıkar
-        if (PhotonNetwork.IsConnected)
-        {
-            Debug.Log("Photon bağlantısı kesiliyor...");
-            PhotonNetwork.Disconnect();
-        }
-
-        // Bağlantının tamamen kesilmesini bekle
-        while (PhotonNetwork.IsConnected)
-        {
-            yield return null;
-        }
-
-        Debug.Log("Photon bağlantısı yeniden başlatılıyor...");
-        // Photon'a yeniden bağlan
-        PhotonNetwork.ConnectUsingSettings();
-        PhotonNetwork.GameVersion = "1.0";
-
-        // Bağlantının yeniden kurulmasını bekle
-        while (!PhotonNetwork.IsConnectedAndReady)
-        {
-            yield return null;
-        }
-
-        Debug.Log("Photon'a yeniden bağlanıldı ve lobiye katılınıyor...");
-        PhotonNetwork.JoinLobby();
-
-        // Lobiye katılmayı bekle
-        while (!PhotonNetwork.InLobby)
-        {
-            yield return null;
-        }
-
-        Debug.Log("Oda listesi yenileniyor...");
-        // Oda listesini yenile
-        RefreshRoomList();
+        yield return null;
     }
 
-    public override void OnDisconnected(DisconnectCause cause)
+    Debug.Log("Photon'a yeniden bağlanıldı ve lobiye katılınıyor...");
+    PhotonNetwork.JoinLobby();
+
+    // Lobiye katılmayı bekle
+    while (!PhotonNetwork.InLobby)
     {
-        Debug.LogError($"Bağlantı kesildi! Sebep: {cause}");
-
-        // Eğer derleme ya da manuel bir sebeple kesildiyse tekrar bağlanmaya gerek olmayabilir
-        if (cause == DisconnectCause.DisconnectByClientLogic)
-        {
-            Debug.LogWarning("Derleme (Recompile) veya manuel kesme nedeniyle bağlantı kesildi, tekrar bağlanılmıyor.");
-            return;
-        }
-
-        // Otomatik yeniden bağlanma
-        if (!PhotonNetwork.IsConnected)
-        {
-            Debug.Log("Bağlantıyı tekrar başlatıyorum...");
-            PhotonNetwork.ConnectUsingSettings();
-        }
+        yield return null;
     }
+
+    Debug.Log("Oda listesi yenileniyor...");
+    // Oda listesini yenile
+    RefreshRoomList();
+}
+
+
 }

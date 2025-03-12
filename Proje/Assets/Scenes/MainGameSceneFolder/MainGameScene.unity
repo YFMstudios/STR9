@@ -3758,6 +3758,7 @@ MonoBehaviour:
   woodAmountText: {fileID: 364913690}
   ironAmountText: {fileID: 1949958081}
   warPowerText: {fileID: 727628280}
+  getPlayerData: {fileID: 11400000, guid: dbce8119d655a674196c61b833d09b51, type: 2}
 --- !u!1 &84412075
 GameObject:
   m_ObjectHideFlags: 0
@@ -8093,6 +8094,7 @@ MonoBehaviour:
   woodAmountText: {fileID: 364913690}
   ironAmountText: {fileID: 1949958081}
   warPowerText: {fileID: 727628280}
+  getPlayerData: {fileID: 11400000, guid: dbce8119d655a674196c61b833d09b51, type: 2}
 --- !u!1 &203434834
 GameObject:
   m_ObjectHideFlags: 0
@@ -17109,12 +17111,12 @@ MonoBehaviour:
   ArianopolLinePNGImage: {fileID: 195365619}
   DhamuronLinePNGImage: {fileID: 954679261}
   AkhadzriaPNGImage: {fileID: 1819740958}
-  LexionTMP: {fileID: 436858305}
-  AlfgardTMP: {fileID: 29222202}
-  ZephrionTMP: {fileID: 2130372194}
-  ArianopolTMP: {fileID: 193385886}
-  DhamuronTMP: {fileID: 361135386}
-  AkhadzriaTMP: {fileID: 1294800183}
+  LexionTMP: {fileID: 0}
+  AlfgardTMP: {fileID: 0}
+  ZephrionTMP: {fileID: 0}
+  ArianopolTMP: {fileID: 0}
+  DhamuronTMP: {fileID: 0}
+  AkhadzriaTMP: {fileID: 0}
   FlagImage: {fileID: 1972852163}
   WarIcon: {fileID: 398410885}
   ObservationImage: {fileID: 1337373507}
@@ -17132,6 +17134,7 @@ MonoBehaviour:
   woodAmountText: {fileID: 364913690}
   ironAmountText: {fileID: 1949958081}
   warPowerText: {fileID: 727628280}
+  getPlayerData: {fileID: 0}
 --- !u!1 &408083855
 GameObject:
   m_ObjectHideFlags: 0
@@ -29661,7 +29664,7 @@ RectTransform:
   m_Father: {fileID: 1867721766}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -38181,6 +38184,7 @@ MonoBehaviour:
   woodAmountText: {fileID: 364913690}
   ironAmountText: {fileID: 1949958081}
   warPowerText: {fileID: 727628280}
+  getPlayerData: {fileID: 11400000, guid: dbce8119d655a674196c61b833d09b51, type: 2}
 --- !u!1 &956970806
 GameObject:
   m_ObjectHideFlags: 0
@@ -39516,7 +39520,7 @@ RectTransform:
   m_Father: {fileID: 1797204193}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -48649,7 +48653,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1194520030
 RectTransform:
   m_ObjectHideFlags: 0
@@ -54962,6 +54966,7 @@ MonoBehaviour:
   woodAmountText: {fileID: 364913690}
   ironAmountText: {fileID: 1949958081}
   warPowerText: {fileID: 727628280}
+  getPlayerData: {fileID: 11400000, guid: dbce8119d655a674196c61b833d09b51, type: 2}
 --- !u!1 &1352198003
 GameObject:
   m_ObjectHideFlags: 0
@@ -55267,6 +55272,7 @@ MonoBehaviour:
   woodAmountText: {fileID: 364913690}
   ironAmountText: {fileID: 1949958081}
   warPowerText: {fileID: 727628280}
+  getPlayerData: {fileID: 11400000, guid: dbce8119d655a674196c61b833d09b51, type: 2}
 --- !u!1 &1361373415
 GameObject:
   m_ObjectHideFlags: 0
@@ -71957,7 +71963,7 @@ RectTransform:
   m_Father: {fileID: 114041115}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -75741,6 +75747,7 @@ MonoBehaviour:
   woodAmountText: {fileID: 364913690}
   ironAmountText: {fileID: 1949958081}
   warPowerText: {fileID: 727628280}
+  getPlayerData: {fileID: 11400000, guid: dbce8119d655a674196c61b833d09b51, type: 2}
 --- !u!1 &1819934894
 GameObject:
   m_ObjectHideFlags: 0
@@ -78051,17 +78058,17 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 92424833}
+  - {fileID: 193385885}
+  - {fileID: 2130372193}
+  - {fileID: 361135385}
+  - {fileID: 1294800182}
+  - {fileID: 436858304}
+  - {fileID: 29222201}
   - {fileID: 1703792661}
   - {fileID: 630421926}
   - {fileID: 407858641}
   - {fileID: 1823880907}
   - {fileID: 525614391}
-  - {fileID: 29222201}
-  - {fileID: 436858304}
-  - {fileID: 1294800182}
-  - {fileID: 361135385}
-  - {fileID: 2130372193}
-  - {fileID: 193385885}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -79810,7 +79817,7 @@ RectTransform:
   m_Father: {fileID: 1482913295}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
